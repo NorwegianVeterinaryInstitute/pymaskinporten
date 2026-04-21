@@ -69,7 +69,7 @@ jobs:
             This release contains the built wheels for all operating systems.
 
       - name: Upload wheels to release
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         with:
           files: ./dist/*.whl
         env:

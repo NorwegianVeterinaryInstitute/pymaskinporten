@@ -1,4 +1,5 @@
 from unittest.mock import patch
+
 from pymaskinporten.request_token import request_maskinporten_token
 
 
@@ -25,5 +26,5 @@ def test_maskinporten_exchange(real_private_key_pem, monkeypatch):
 
         # Ensure correct endpoint hit
         mocked_post.assert_called_once()
-        url, kwargs = mocked_post.call_args
+        url, _kwargs = mocked_post.call_args
         assert "https://test.maskinporten.no/token" in url[0]

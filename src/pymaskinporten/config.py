@@ -1,10 +1,10 @@
+import os
+
 from azure.identity import DefaultAzureCredential
 from azure.keyvault.secrets import SecretClient
 from cryptography.hazmat.primitives.serialization import load_pem_private_key
 from dotenv import load_dotenv
-import os
 from pydantic import BaseModel, Field, field_validator
-from typing import Dict, Optional
 
 
 class MaskinportenSecrets(BaseModel):
@@ -32,8 +32,8 @@ class MaskinportenSecrets(BaseModel):
 
 def load_config(
     deployment: str = "local",
-    secret_scope: Optional[str] = None,
-    key_vault_uri: Optional[str] = None,
+    secret_scope: str | None = None,
+    key_vault_uri: str | None = None,
 ) -> MaskinportenSecrets:
     if deployment == "local":
         load_dotenv()
@@ -55,11 +55,11 @@ def load_config(
     return MaskinportenSecrets(**raw)
 
 
-def _load_local_env() -> Dict[str, str]:
+def _load_local_env() -> dict[str, str]:
     """Load secret config from environment variables."""
-    config: Dict[str, str] = {}
+    config: dict[str, str] = {}
 
-    for key in MaskinportenSecrets.model_fields.keys():
+    for key in MaskinportenSecrets.model_fields:
         value = os.getenv(key)
         if value is None:
             raise RuntimeError(f"Missing required environment variable: {key}")
@@ -68,11 +68,11 @@ def _load_local_env() -> Dict[str, str]:
     return config
 
 
-def _load_databricks_secrets(secret_scope: str) -> Dict[str, str]:
+def _load_databricks_secrets(secret_scope: str) -> dict[str, str]:
     """Load secret config from Databricks Secrets."""
-    config: Dict[str, str] = {}
+    config: dict[str, str] = {}
 
-    for key in MaskinportenSecrets.model_fields.keys():
+    for key in MaskinportenSecrets.model_fields:
         value = dbutils.secrets.get(scope=secret_scope, key=key)  # noqa: F821 # type: ignore
         if value is None:
             raise RuntimeError(f"Missing required secret in Key Vault: {key}")
@@ -81,15 +81,15 @@ def _load_databricks_secrets(secret_scope: str) -> Dict[str, str]:
     return config
 
 
-def _load_azure_key_vault_secrets(key_vault_uri: str) -> Dict[str, str]:
+def _load_azure_key_vault_secrets(key_vault_uri: str) -> dict[str, str]:
     """Load secret config from Azure Key Vault."""
-    config: Dict[str, str] = {}
+    config: dict[str, str] = {}
 
     # Authenticate using DefaultAzureCredential (Azure Managed Identity or Environment Auth)
     credential = DefaultAzureCredential()
     client = SecretClient(vault_url=key_vault_uri, credential=credential)
 
-    for key in MaskinportenSecrets.model_fields.keys():
+    for key in MaskinportenSecrets.model_fields:
         value = client.get_secret(key).value
         if value is None:
             raise RuntimeError(f"Missing required secret in Key Vault: {key}")

@@ -1,5 +1,6 @@
 import pytest
 from pydantic import ValidationError
+
 from pymaskinporten.config import load_config
 
 

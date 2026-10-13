@@ -1,8 +1,14 @@
-from datetime import datetime, timedelta, timezone
+import uuid
+from datetime import UTC, datetime, timedelta
+
 import httpx2 as httpx
 from jwt import encode
-import uuid
-from pymaskinporten.config import load_config, MaskinportenSecrets
+
+from pymaskinporten.config import MaskinportenSecrets, load_config
+
+
+class MaskinportenTokenError(Exception):
+    """Raised when Maskinporten rejects a token request."""
 
 
 def build_jwt(cfg: MaskinportenSecrets, issuer_url: str) -> str:
@@ -25,8 +31,8 @@ def build_jwt(cfg: MaskinportenSecrets, issuer_url: str) -> str:
         "aud": issuer_url,
         "iss": cfg.MASKINPORTEN_CLIENT_ID,
         "scope": cfg.SCOPE,
-        "iat": datetime.now(tz=timezone.utc),
-        "exp": datetime.now(tz=timezone.utc) + timedelta(minutes=1),
+        "iat": datetime.now(tz=UTC),
+        "exp": datetime.now(tz=UTC) + timedelta(minutes=1),
         "jti": str(uuid.uuid4()),
     }
 
@@ -46,7 +52,7 @@ def request_maskinporten_token(api_env: str) -> tuple:
         tuple: A tuple containing the access token (str) and its expiration time (int).
 
     Raises:
-        Exception: If the token request fails.
+        MaskinportenTokenError: If the token request fails.
 
     Examples:
         request_maskinporten_token(api_env = "test")
@@ -79,4 +85,4 @@ def request_maskinporten_token(api_env: str) -> tuple:
         )
         return access_token, expires_in
     else:
-        raise Exception(f"Error {response.status_code}: {response.text}")
+        raise MaskinportenTokenError(f"Error {response.status_code}: {response.text}")

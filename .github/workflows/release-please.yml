@@ -11,9 +11,58 @@ jobs:
     permissions:
       contents: write
       pull-requests: write
+    outputs:
+      release_created: ${{ steps.release.outputs.release_created }}
+      tag_name: ${{ steps.release.outputs.tag_name }}
 
     steps:
       - uses: googleapis/release-please-action@v5
+        id: release
         with:
           config-file: release-please-config.json
           manifest-file: .release-please-manifest.json
+
+      # Release-please only bumps versions; the release date must land on the
+      # release PR so the tagged release carries it.
+      - name: Check out release PR branch
+        if: ${{ steps.release.outputs.pr }}
+        uses: actions/checkout@v7
+        with:
+          ref: ${{ fromJSON(steps.release.outputs.pr).headBranchName }}
+
+      - name: Update release date in CITATION.cff
+        if: ${{ steps.release.outputs.pr }}
+        run: |
+          set -e
+          DATE=$(date -u +%Y-%m-%d)
+
+          sed -E -i "s/^date-released:.*/date-released: \"${DATE}\"/" CITATION.cff
+          sed -E -i 's/^( *repository-code:\s*)"?([^\"]+)"?/\1"\2"/' CITATION.cff
+          sed -E -i 's/^( *orcid:\s*)"?([^\"]+)"?/\1"\2"/' CITATION.cff
+
+          pipx run --spec cffconvert==2.0.0 cffconvert -i CITATION.cff --validate
+
+      - name: Commit to release PR
+        if: ${{ steps.release.outputs.pr }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898283+github-actions[bot]@users.noreply.github.com"
+          git add CITATION.cff
+          if git diff --cached --quiet; then
+            echo "No changes"
+          else
+            git commit -m "chore: update CITATION.cff date-released"
+            git push
+          fi
+
+  docker:
+    needs: release-please
+    if: ${{ needs.release-please.outputs.release_created }}
+    permissions:
+      contents: read
+      packages: write
+      attestations: write
+      id-token: write
+    uses: ./.github/workflows/docker.yml
+    with:
+      tag: ${{ needs.release-please.outputs.tag_name }}

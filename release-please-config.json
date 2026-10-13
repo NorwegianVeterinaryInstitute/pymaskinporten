@@ -3,13 +3,19 @@
     ".": {
       "release-type": "python",
       "package-name": "",
-      "extra-files": ["pyproject.toml",
+      "extra-files": [
+        "pyproject.toml",
         {
           "path": "uv.lock",
           "type": "toml",
           "jsonpath": "$.package[?(@.name.value=='pymaskinporten')].version"
+        },
+        {
+          "path": "CITATION.cff",
+          "type": "yaml",
+          "jsonpath": "$.version"
         }
-      ] 
+      ]
+    }
   }
-}
 }

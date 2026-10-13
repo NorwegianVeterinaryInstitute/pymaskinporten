@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.1.3](https://github.com/NorwegianVeterinaryInstitute/pymaskinporten/compare/v1.1.2...v1.1.3) (2026-10-13)
+
+
+### Bug Fixes
+
+* **deps:** require patched pyjwt and httpx2, drop unused jwcrypto ([#109](https://github.com/NorwegianVeterinaryInstitute/pymaskinporten/issues/109)) ([a0ed5d6](https://github.com/NorwegianVeterinaryInstitute/pymaskinporten/commit/a0ed5d66cdf81f2eed3a15795d3140d83b807d38)), closes [#108](https://github.com/NorwegianVeterinaryInstitute/pymaskinporten/issues/108)
+
 ## [1.1.2](https://github.com/NorwegianVeterinaryInstitute/pymaskinporten/compare/v1.1.1...v1.1.2) (2026-07-03)
 
 

@@ -1,8 +1,10 @@
 import os
+
+from dotenv import load_dotenv
 from flask import Flask, jsonify, render_template, request
+
 from pymaskinporten.config import load_config
 from pymaskinporten.request_token import request_maskinporten_token
-from dotenv import load_dotenv
 
 # Configure application
 app = Flask(__name__)

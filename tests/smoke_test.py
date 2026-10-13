@@ -1,5 +1,7 @@
 # smoke_test.py
 
+import sys
+
 try:
     from pymaskinporten import main
 
@@ -7,4 +9,4 @@ try:
     print("Smoke test passed: App imported successfully!")
 except ImportError as e:
     print(f"Smoke test failed: {e}")
-    exit(1)
+    sys.exit(1)

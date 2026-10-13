@@ -1,4 +1,5 @@
 import jwt
+
 from pymaskinporten.config import MaskinportenSecrets
 from pymaskinporten.request_token import build_jwt
 

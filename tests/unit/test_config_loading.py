@@ -1,5 +1,6 @@
 import pytest
-from pymaskinporten.config import load_config, MaskinportenSecrets
+
+from pymaskinporten.config import MaskinportenSecrets, load_config
 
 
 @pytest.mark.unit

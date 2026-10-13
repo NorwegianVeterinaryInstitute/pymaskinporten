@@ -14,7 +14,7 @@
 [![License](https://img.shields.io/badge/license-Apache%20License%202.0-blue)](https://opensource.org/license/apache-2.0)
 <!-- badges end-->
 
-This is a python package to request a token from [Maskinporten](https://www.digdir.no/felleslosninger/maskinporten/869) - the Norwegian 
+This is a python package to request a token from [Maskinporten](https://samarbeid.digdir.no/maskinporten/dette-er-maskinporten/96) - the Norwegian 
 national access control solution for businesses that exchange data.
 
 ```mermaid

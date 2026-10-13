@@ -1,4 +1,4 @@
-name: docker
+name: Docker
 
 on:
   push:
@@ -9,6 +9,14 @@ on:
   pull_request:
     branches:
       - "main"
+  # Called by release-please: its tags are pushed with GITHUB_TOKEN, which
+  # does not trigger the tag push above.
+  workflow_call:
+    inputs:
+      tag:
+        description: Release tag to build, e.g. v1.1.3
+        required: true
+        type: string
 
 jobs:
   docker:
@@ -21,6 +29,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v7
+        with:
+          ref: ${{ inputs.tag || github.ref }}
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v4
@@ -32,12 +42,12 @@ jobs:
           images: |
             ghcr.io/${{ github.repository }}
           tags: |
-            type=ref,event=branch
+            type=ref,event=branch,enable=${{ !inputs.tag }}
             type=ref,event=pr
-            type=semver,pattern={{version}}
-            type=semver,pattern={{major}}.{{minor}}
-            type=semver,pattern={{major}}
-            type=sha
+            type=semver,pattern={{version}},value=${{ inputs.tag }}
+            type=semver,pattern={{major}}.{{minor}},value=${{ inputs.tag }}
+            type=semver,pattern={{major}},value=${{ inputs.tag }}
+            type=sha,enable=${{ !inputs.tag }}
         # ghcr.io prefers index level annotations
         env:
           DOCKER_METADATA_ANNOTATIONS_LEVELS: manifest,index

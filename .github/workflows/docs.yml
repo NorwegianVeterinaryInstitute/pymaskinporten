@@ -1,5 +1,5 @@
 # built with great-docs: https://posit-dev.github.io/great-docs/
-name: website
+name: Docs
 
 # build the documentation whenever there are new commits on main
 on:

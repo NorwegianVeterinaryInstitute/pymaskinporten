@@ -1,4 +1,4 @@
-name: "Publish"
+name: Publish to PyPI
 
 on:
   push:
@@ -10,7 +10,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  run:
+  publish:
     runs-on: ubuntu-latest
     environment:
       name: pypi

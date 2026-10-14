@@ -7,10 +7,17 @@ Provides a set of functions to fetch a token from Maskinporten
    :start-line: 15
 """
 
+from pymaskinporten.config import MaskinportenSecrets, load_config
+from pymaskinporten.request_token import (
+    MaskinportenTokenError,
+    build_jwt,
+    request_maskinporten_token,
+)
 
-def main() -> str:
-    return "Hello from pymaskinporten!"
-
-
-if __name__ == "__main__":
-    print(main())
+__all__ = [
+    "MaskinportenSecrets",
+    "MaskinportenTokenError",
+    "build_jwt",
+    "load_config",
+    "request_maskinporten_token",
+]

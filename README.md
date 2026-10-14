@@ -61,6 +61,11 @@ raises `MaskinportenTokenError`.
 
 ### Secret stores
 
+> [!NOTE]
+> The secret-store loaders are tested only against mocked SDKs, not against real Azure Key
+> Vault, Databricks, AWS or Google Cloud services. Please report problems in the
+> [issue tracker](https://github.com/NorwegianVeterinaryInstitute/pymaskinporten/issues).
+
 `load_config()` can also read the credentials from a secret store. Pass the result with `config=`:
 
 ```python

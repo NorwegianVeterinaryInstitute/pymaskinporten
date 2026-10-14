@@ -27,8 +27,5 @@ def test_private_key_invalid_in_strict_mode(monkeypatch, fake_pem):
     monkeypatch.setenv("SCOPE", "scope:a")
 
     # Should fail cryptographic decoding
-    try:
+    with pytest.raises(ValidationError, match="Invalid PRIVATE_KEY PEM"):
         load_config()
-        assert False, "Expected ValidationError"
-    except ValidationError:
-        pass

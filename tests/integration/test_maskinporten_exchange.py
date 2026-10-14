@@ -1,8 +1,11 @@
 from unittest.mock import patch
 
+import pytest
+
 from pymaskinporten.request_token import request_maskinporten_token
 
 
+@pytest.mark.integration
 def test_maskinporten_exchange(real_private_key_pem, monkeypatch):
     fake_response = {
         "access_token": "fake-token",

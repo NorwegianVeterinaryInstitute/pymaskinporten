@@ -12,24 +12,50 @@ graph LR
 
 ## Example usage
 
-This assumes that:
-1. You have created the integration on digidir.no and,
-2. You have set the necessary environment variables for your API credentials.
+This assumes you have created the integration at Digdir and have its private key (PEM), key ID,
+client ID and scope.
+
+By default the credentials are read from the environment variables `PRIVATE_KEY`,
+`MASKINPORTEN_CLIENT_ID`, `KID` and `SCOPE`:
 
 ```python
-# set environment variables for your API
-import os
-os.environ["KID"] = "your_kid"
-os.environ["PRIVATE_KEY"] = "your_private_key"
-os.environ["MASKINPORTEN_CLIENT_ID"] = "your_client_id"
-os.environ["SCOPE"] = "your_scope"
+from pymaskinporten import request_maskinporten_token
 
-# get the access token
-from pymaskinporten.request_token import request_maskinporten_token
-access_token, expires_in = request_maskinporten_token("test")
-print(f"Access Token: {access_token}")
-print(f"Expires In: {expires_in} seconds")
+access_token, expires_in = request_maskinporten_token("test")  # or "prod"
 ```
+
+`api_env` must be `"test"` or `"prod"`; anything else raises `ValueError`. A failed token request
+raises `MaskinportenTokenError`.
+
+### Passing credentials directly
+
+To use credentials from somewhere else, such as a secret store, build them yourself and pass them
+with `config=`:
+
+```python
+from pymaskinporten import MaskinportenSecrets, request_maskinporten_token
+
+secrets = MaskinportenSecrets(
+    PRIVATE_KEY=open("private_key.pem").read(),
+    MASKINPORTEN_CLIENT_ID="your-client-id",
+    KID="your-kid",
+    SCOPE="your-scope",
+)
+access_token, expires_in = request_maskinporten_token("prod", config=secrets)
+```
+
+### Using a `.env` file
+
+By default, `load_config()` reads environment variables only. To keep the credentials in a `.env`
+file, load it before requesting a token:
+
+```python
+from dotenv import load_dotenv
+
+load_dotenv()
+```
+
+The demo app below does this for you.
 
 ## Docker container
 

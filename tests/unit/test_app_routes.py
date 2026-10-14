@@ -2,6 +2,9 @@ from unittest.mock import patch
 
 import pytest
 
+# The demo app needs the web extra
+pytest.importorskip("flask")
+
 from pymaskinporten.app import app
 
 

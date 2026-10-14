@@ -1,8 +1,15 @@
 import os
 
-from dotenv import load_dotenv
-from flask import Flask, jsonify, render_template, request
 from pydantic import ValidationError
+
+try:
+    from dotenv import load_dotenv
+    from flask import Flask, jsonify, render_template, request
+except ImportError as e:
+    raise ImportError(
+        "The maskinporten-web demo app needs the web extra: "
+        "pip install pymaskinporten[web]"
+    ) from e
 
 from pymaskinporten.config import load_config
 from pymaskinporten.request_token import ISSUER_URLS, request_maskinporten_token

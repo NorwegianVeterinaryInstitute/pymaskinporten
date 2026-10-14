@@ -1,5 +1,8 @@
 import pytest
 
+# The demo app needs the web extra
+pytest.importorskip("flask")
+
 from pymaskinporten import app as app_module
 
 

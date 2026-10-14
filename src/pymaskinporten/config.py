@@ -39,6 +39,7 @@ def load_config(
     deployment: str = "local",
     secret_scope: str | None = None,
     key_vault_uri: str | None = None,
+    region: str | None = None,
 ) -> MaskinportenSecrets:
     """
     Loads and validates Maskinporten credentials.
@@ -51,8 +52,11 @@ def load_config(
             SCOPE, signing in with DefaultAzureCredential.
             "databricks" reads the same dashed secret names from a Databricks secret scope;
             needs the databricks-sdk package.
+            "aws" reads the same dashed secret names from AWS Secrets Manager, signing in
+            with boto3's default credential chain; needs pymaskinporten[aws].
         secret_scope: The Databricks secret scope. Required for "databricks".
         key_vault_uri: The Key Vault URL. Required for "azure".
+        region: The AWS region for "aws". Defaults to boto3's configured region.
 
     Returns:
         MaskinportenSecrets: The validated credentials.
@@ -66,6 +70,7 @@ def load_config(
         load_config()
         load_config("azure", key_vault_uri="https://my-vault.vault.azure.net/")
         load_config("databricks", secret_scope="maskinporten")
+        load_config("aws", region="eu-north-1")
     """
     if deployment == "local":
         raw = _load_local_env()
@@ -79,6 +84,9 @@ def load_config(
         if not key_vault_uri:
             raise ValueError("key_vault_uri is required for Azure Key Vault")
         raw = _load_azure_key_vault_secrets(key_vault_uri)
+
+    elif deployment == "aws":
+        raw = _load_aws_secrets(region)
 
     else:
         raise ValueError(f"Unknown deployment type: {deployment}")
@@ -148,6 +156,42 @@ def _load_azure_key_vault_secrets(key_vault_uri: str) -> dict[str, str]:
             raise RuntimeError(f"Could not read secret {name!r} from Key Vault") from e
         if value is None:
             raise RuntimeError(f"Missing required secret in Key Vault: {name}")
+        config[key] = value
+
+    return config
+
+
+def _load_aws_secrets(region: str | None) -> dict[str, str]:
+    """Load secret config from AWS Secrets Manager."""
+    try:
+        import boto3
+    except ImportError as e:
+        raise RuntimeError(
+            "AWS Secrets Manager needs boto3: pip install pymaskinporten[aws]"
+        ) from e
+
+    try:
+        client = boto3.client("secretsmanager", region_name=region)
+    except Exception as e:
+        # e.g. NoRegionError when no region is given or configured
+        raise RuntimeError("Could not create the AWS Secrets Manager client") from e
+
+    config: dict[str, str] = {}
+
+    for key in MaskinportenSecrets.model_fields:
+        name = _secret_name(key)
+        try:
+            value = client.get_secret_value(SecretId=name).get("SecretString")
+        except Exception as e:
+            # botocore raises ClientError for missing secrets and access denied, and
+            # its own errors for missing credentials
+            raise RuntimeError(
+                f"Could not read secret {name!r} from AWS Secrets Manager"
+            ) from e
+        if value is None:
+            raise RuntimeError(
+                f"Secret {name!r} in AWS Secrets Manager has no string value"
+            )
         config[key] = value
 
     return config

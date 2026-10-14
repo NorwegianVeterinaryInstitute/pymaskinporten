@@ -1,3 +1,4 @@
+import logging
 import uuid
 from datetime import UTC, datetime, timedelta
 from typing import Literal
@@ -6,6 +7,8 @@ import httpx2 as httpx
 from jwt import encode
 
 from pymaskinporten.config import MaskinportenSecrets, load_config
+
+logger = logging.getLogger(__name__)
 
 ApiEnv = Literal["test", "prod"]
 
@@ -108,7 +111,5 @@ def request_maskinporten_token(
     ):
         raise MaskinportenTokenError(f"Unexpected token response from {issuer_url}")
 
-    print(
-        f"Access token for {cfg.SCOPE} in {api_env} environment fetched successfully."
-    )
+    logger.info("Fetched Maskinporten access token for %s (%s)", cfg.SCOPE, api_env)
     return access_token, expires_in

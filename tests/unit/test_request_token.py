@@ -1,3 +1,4 @@
+import logging
 from unittest.mock import patch
 
 import httpx2 as httpx
@@ -109,3 +110,12 @@ def test_200_with_non_json_body_raises_token_error(secrets, mocked_post):
 
     with pytest.raises(MaskinportenTokenError, match="Unexpected token response"):
         request_maskinporten_token("test", config=secrets)
+
+
+@pytest.mark.unit
+def test_success_is_logged_not_printed(secrets, mocked_post, caplog, capsys):
+    with caplog.at_level(logging.INFO, logger="pymaskinporten.request_token"):
+        request_maskinporten_token("test", config=secrets)
+
+    assert "scope:a" in caplog.text
+    assert capsys.readouterr().out == ""

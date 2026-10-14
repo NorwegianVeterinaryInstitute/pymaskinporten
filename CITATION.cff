@@ -12,12 +12,12 @@ abstract: >-
 authors:
   - family-names: Nakov
     given-names: Novica
-    orcid: https://orcid.org/0009-0005-7773-7718
-repository-code: https://github.com/NorwegianVeterinaryInstitute/pymaskinporten
+    orcid: "https://orcid.org/0009-0005-7773-7718"
+repository-code: "https://github.com/NorwegianVeterinaryInstitute/pymaskinporten"
 url: https://github.com/NorwegianVeterinaryInstitute/pymaskinporten
 contact:
   - family-names: Nakov
     given-names: Novica
     email: nnovica@gmail.com
-    orcid: https://orcid.org/0009-0005-7773-7718
-date-released: '2026-10-13'
+    orcid: "https://orcid.org/0009-0005-7773-7718"
+date-released: "2026-10-14"

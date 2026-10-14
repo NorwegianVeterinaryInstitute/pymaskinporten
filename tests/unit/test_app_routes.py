@@ -23,3 +23,37 @@ def test_token_defaults_to_test_env(query):
 
     assert response.status_code == 200
     request_token.assert_called_once_with(api_env="test")
+
+
+@pytest.fixture
+def credentials_env(monkeypatch, fake_pem):
+    monkeypatch.setenv("PRIVATE_KEY", fake_pem)
+    monkeypatch.setenv("MASKINPORTEN_CLIENT_ID", "client-id")
+    monkeypatch.setenv("KID", "kid123")
+    monkeypatch.setenv("SCOPE", "scope:a")
+
+
+@pytest.mark.unit
+def test_index_shows_invalid_config_instead_of_500(monkeypatch, credentials_env):
+    monkeypatch.setenv("KID", "")
+
+    response = app.test_client().get("/")
+
+    assert response.status_code == 200
+    assert "Configuration error" in response.text
+    assert "KID" in response.text
+
+
+@pytest.mark.unit
+def test_index_config_error_does_not_leak_private_key(monkeypatch, credentials_env):
+    # Key material pasted without the PEM armor lines, so a truncated repr would show it
+    monkeypatch.setenv(
+        "PRIVATE_KEY", "MIIBVwIBADANBgkqhkiG9w0BAQEFAASCAT8wggE7AgEAAkEAuQ"
+    )
+    monkeypatch.setenv("STRICT_KEY_VALIDATION", "true")
+
+    response = app.test_client().get("/")
+
+    assert response.status_code == 200
+    assert "PRIVATE_KEY" in response.text
+    assert "MIIBVwIBADAN" not in response.text

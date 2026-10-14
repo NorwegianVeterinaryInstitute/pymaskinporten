@@ -2,6 +2,7 @@ import os
 
 from dotenv import load_dotenv
 from flask import Flask, jsonify, render_template, request
+from pydantic import ValidationError
 
 from pymaskinporten.config import load_config
 from pymaskinporten.request_token import ISSUER_URLS, request_maskinporten_token
@@ -17,7 +18,7 @@ load_dotenv()
 def after_request(response):
     """Ensure responses aren't cached"""
     response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
-    response.headers["Expires"] = 0
+    response.headers["Expires"] = "0"
     response.headers["Pragma"] = "no-cache"
     return response
 
@@ -33,6 +34,12 @@ def index():
         config = load_config()
     except RuntimeError as e:
         config_error = str(e)
+    except ValidationError as e:
+        # str(e) shows the start and end of each rejected value; for a key pasted
+        # without its PEM armor lines that is key material, so list fields only
+        config_error = "; ".join(
+            f"{'.'.join(map(str, err['loc']))}: {err['msg']}" for err in e.errors()
+        )
 
     if request.method == "POST":
         selected_env = request.form.get("environment")

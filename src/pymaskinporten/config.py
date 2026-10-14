@@ -133,6 +133,13 @@ def _load_databricks_secrets(secret_scope: str, prefix: str) -> dict[str, str]:
         raise RuntimeError(
             "Databricks secrets need databricks-sdk: pip install pymaskinporten[databricks]"
         ) from e
+    except Exception as e:
+        # Outside Databricks the import builds a remote client, which raises ValueError
+        # when no Databricks authentication is configured
+        raise RuntimeError(
+            "Could not set up Databricks dbutils; outside Databricks, configure "
+            "Databricks authentication"
+        ) from e
 
     config: dict[str, str] = {}
 

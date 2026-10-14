@@ -1,8 +1,5 @@
 import os
 
-from azure.core.exceptions import AzureError, ResourceNotFoundError
-from azure.identity import DefaultAzureCredential
-from azure.keyvault.secrets import SecretClient
 from cryptography.hazmat.primitives.serialization import load_pem_private_key
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
@@ -51,7 +48,7 @@ def load_config(
             "local" reads the environment variables PRIVATE_KEY, MASKINPORTEN_CLIENT_ID, KID
             and SCOPE.
             "azure" reads the Key Vault secrets PRIVATE-KEY, MASKINPORTEN-CLIENT-ID, KID and
-            SCOPE, signing in with DefaultAzureCredential.
+            SCOPE, signing in with DefaultAzureCredential; needs pymaskinporten[azure].
             "databricks" reads the same dashed secret names from a Databricks secret scope;
             needs the databricks-sdk package.
             "aws" reads the same dashed secret names from AWS Secrets Manager, signing in
@@ -155,6 +152,15 @@ def _load_databricks_secrets(secret_scope: str, prefix: str) -> dict[str, str]:
 
 def _load_azure_key_vault_secrets(key_vault_uri: str, prefix: str) -> dict[str, str]:
     """Load secret config from Azure Key Vault."""
+    try:
+        from azure.core.exceptions import AzureError, ResourceNotFoundError
+        from azure.identity import DefaultAzureCredential
+        from azure.keyvault.secrets import SecretClient
+    except ImportError as e:
+        raise RuntimeError(
+            "Azure Key Vault needs the Azure SDK: pip install pymaskinporten[azure]"
+        ) from e
+
     config: dict[str, str] = {}
 
     # Authenticate using DefaultAzureCredential (Azure Managed Identity or Environment Auth)

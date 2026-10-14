@@ -30,14 +30,14 @@ WORKDIR /src
 RUN --mount=type=cache,target=/cache \
     --mount=type=bind,source=uv.lock,target=uv.lock \
     --mount=type=bind,source=pyproject.toml,target=pyproject.toml \
-    uv sync --no-dev --no-editable --no-install-project
+    uv sync --no-dev --no-editable --no-install-project --extra web
 
 # Copy the project into the builder - COPY is affected by `.dockerignore`
 COPY . /src
 
 # Sync the project - it will be installed in /app/
 RUN --mount=type=cache,target=/cache \
-    uv sync --no-dev --no-editable
+    uv sync --no-dev --no-editable --extra web
 
 
 ## Runtime image

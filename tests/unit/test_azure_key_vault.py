@@ -1,13 +1,19 @@
-from types import SimpleNamespace
+import sys
+from types import ModuleType, SimpleNamespace
 
 import pytest
-from azure.core.exceptions import (
-    ClientAuthenticationError,
-    HttpResponseError,
-    ResourceNotFoundError,
-)
 
 from pymaskinporten import config
+
+# The loader tells ResourceNotFoundError apart from other Azure errors, so use the real
+# exception classes; skip when the azure extra isn't installed
+azure_exceptions = pytest.importorskip("azure.core.exceptions")
+pytest.importorskip("azure.identity")
+pytest.importorskip("azure.keyvault.secrets")
+ClientAuthenticationError = azure_exceptions.ClientAuthenticationError
+HttpResponseError = azure_exceptions.HttpResponseError
+ResourceNotFoundError = azure_exceptions.ResourceNotFoundError
+
 
 VAULT = "https://my-vault.vault.azure.net/"
 
@@ -39,8 +45,9 @@ def vault(monkeypatch, fake_pem):
             "SCOPE": "scope:a",
         }
     )
-    monkeypatch.setattr(config, "SecretClient", client)
-    monkeypatch.setattr(config, "DefaultAzureCredential", lambda: object())
+    # The loader imports these when it runs, so patch them on the SDK modules
+    monkeypatch.setattr("azure.keyvault.secrets.SecretClient", client)
+    monkeypatch.setattr("azure.identity.DefaultAzureCredential", lambda: object())
     return client
 
 
@@ -100,3 +107,15 @@ def test_prefix_is_prepended(vault):
     cfg = config.load_config("azure", key_vault_uri=VAULT, prefix="mp-prod-")
 
     assert cfg.KID == "kid123"
+
+
+@pytest.mark.unit
+def test_missing_sdk_raises_install_hint(monkeypatch):
+    # An empty azure.keyvault package, so importing secrets from it fails
+    keyvault = ModuleType("azure.keyvault")
+    keyvault.__path__ = []
+    monkeypatch.setitem(sys.modules, "azure.keyvault", keyvault)
+    monkeypatch.delitem(sys.modules, "azure.keyvault.secrets", raising=False)
+
+    with pytest.raises(RuntimeError, match=r"pymaskinporten\[azure\]"):
+        config.load_config("azure", key_vault_uri=VAULT)

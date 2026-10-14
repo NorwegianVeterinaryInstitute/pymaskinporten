@@ -4,7 +4,7 @@ from dotenv import load_dotenv
 from flask import Flask, jsonify, render_template, request
 
 from pymaskinporten.config import load_config
-from pymaskinporten.request_token import request_maskinporten_token
+from pymaskinporten.request_token import ISSUER_URLS, request_maskinporten_token
 
 # Configure application
 app = Flask(__name__)
@@ -36,10 +36,7 @@ def index():
 
     if request.method == "POST":
         selected_env = request.form.get("environment")
-        if selected_env == "prod":
-            issuer_url = "https://maskinporten.no/token"
-        elif selected_env == "test" or selected_env is None:
-            issuer_url = "https://test.maskinporten.no/token"
+        issuer_url = ISSUER_URLS.get(selected_env or "test")
 
     return render_template(
         "index.html",
@@ -54,10 +51,9 @@ def index():
 def get_token():
 
     # reads ?env=test or ?env=prod
-    env = request.args.get("env")
-
-    if env is None:
-        env = "test"
+    env = request.args.get("env") or "test"
+    if env not in ISSUER_URLS:
+        return jsonify({"error": "env must be 'test' or 'prod'."}), 400
 
     try:
         access_token, expires_in = request_maskinporten_token(api_env=env)

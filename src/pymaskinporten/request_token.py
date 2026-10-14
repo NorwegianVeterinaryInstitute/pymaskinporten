@@ -1,10 +1,18 @@
 import uuid
 from datetime import UTC, datetime, timedelta
+from typing import Literal
 
 import httpx2 as httpx
 from jwt import encode
 
 from pymaskinporten.config import MaskinportenSecrets, load_config
+
+ApiEnv = Literal["test", "prod"]
+
+ISSUER_URLS: dict[ApiEnv, str] = {
+    "test": "https://test.maskinporten.no/token",
+    "prod": "https://maskinporten.no/token",
+}
 
 
 class MaskinportenTokenError(Exception):
@@ -41,29 +49,33 @@ def build_jwt(cfg: MaskinportenSecrets, issuer_url: str) -> str:
     return jwt_assertion
 
 
-def request_maskinporten_token(api_env: str) -> tuple:
+def request_maskinporten_token(
+    api_env: ApiEnv = "test", config: MaskinportenSecrets | None = None
+) -> tuple[str, int]:
     """
-    Requests an access token from Maskinporten using API-specific credentials.
+    Requests an access token from Maskinporten.
 
     Args:
-        api_env (str): The environment of the API (e.g., "prod" or "test").
+        api_env: The Maskinporten environment, "test" or "prod".
+        config: The credentials to use. If None, they are read with `load_config()`.
 
     Returns:
-        tuple: A tuple containing the access token (str) and its expiration time (int).
+        tuple: The access token (str) and its lifetime in seconds (int).
 
     Raises:
+        ValueError: If `api_env` is not "test" or "prod".
         MaskinportenTokenError: If the token request fails.
 
     Examples:
-        request_maskinporten_token(api_env = "test")
+        request_maskinporten_token("test")
+        request_maskinporten_token("prod", config=load_config("azure", key_vault_uri=uri))
     """
 
-    if api_env == "test":
-        issuer_url = "https://test.maskinporten.no/token"
-    else:
-        issuer_url = "https://maskinporten.no/token"
+    if api_env not in ISSUER_URLS:
+        raise ValueError(f"api_env must be 'test' or 'prod', got {api_env!r}")
+    issuer_url = ISSUER_URLS[api_env]
 
-    cfg = load_config()
+    cfg = config if config is not None else load_config()
 
     jwt_assertion = build_jwt(cfg, issuer_url)
 

@@ -43,16 +43,26 @@ raises `MaskinportenTokenError`.
 
 ### Secret stores
 
-`load_config()` can also read the credentials from Azure Key Vault or Databricks secrets. Pass the
-result with `config=`:
+`load_config()` can also read the credentials from a secret store. Pass the result with `config=`:
 
 ```python
 from pymaskinporten import load_config, request_maskinporten_token
 
 config = load_config("azure", key_vault_uri="https://my-vault.vault.azure.net/")
-# or: config = load_config("databricks", secret_scope="maskinporten")
 access_token, expires_in = request_maskinporten_token("prod", config=config)
 ```
+
+| Store                 | Call                                                         | Install                              |
+|-----------------------|--------------------------------------------------------------|--------------------------------------|
+| Azure Key Vault       | `load_config("azure", key_vault_uri="https://...")`          | included                             |
+| Databricks secrets    | `load_config("databricks", secret_scope="maskinporten")`     | `pip install databricks-sdk`         |
+| AWS Secrets Manager   | `load_config("aws", region="eu-north-1")`                    | `pip install "pymaskinporten[aws]"`  |
+| Google Secret Manager | `load_config("gcp", project_id="my-project")`                | `pip install "pymaskinporten[gcp]"`  |
+
+Each store signs in with its SDK's default credentials: `DefaultAzureCredential` for Azure,
+the Databricks runtime for Databricks, boto3's credential chain for AWS (`region` falls back to
+boto3's configured region), and Application Default Credentials for Google (the latest secret
+version is read).
 
 Secret stores use dashes in the names, because Key Vault doesn't allow underscores:
 
@@ -63,10 +73,23 @@ Secret stores use dashes in the names, because Key Vault doesn't allow underscor
 | Key ID            | `KID`                    | `KID`                    |
 | Scope             | `SCOPE`                  | `SCOPE`                  |
 
-- **Azure Key Vault** signs in with `DefaultAzureCredential` (managed identity, environment
-  variables or an Azure CLI login).
-- **Databricks** reads the given secret scope through `databricks.sdk.runtime.dbutils` and needs
-  `pip install databricks-sdk`.
+### Name prefixes
+
+`prefix` is put in front of every environment variable or secret name, so test and prod
+credentials can live side by side:
+
+```python
+load_config(prefix="PROD_")                         # reads PROD_PRIVATE_KEY, PROD_KID, ...
+load_config("aws", prefix="maskinporten/prod/")     # reads maskinporten/prod/PRIVATE-KEY, ...
+```
+
+The prefix is used as-is, so use only characters the source allows (besides letters and digits):
+
+- Environment variables: `_`
+- Azure Key Vault: `-`
+- Google Secret Manager: `-` `_`
+- Databricks: `-` `_` `.`
+- AWS Secrets Manager: `-` `_` `/` `+` `=` `.` `@`
 
 ### Passing credentials directly
 

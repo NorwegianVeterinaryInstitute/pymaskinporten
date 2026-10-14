@@ -15,7 +15,7 @@ def test_private_key_not_valid_but_allowed_by_default(monkeypatch, fake_pem):
     cfg = load_config()
 
     # Still accepted because strict validation is OFF by default
-    assert cfg.PRIVATE_KEY == fake_pem
+    assert cfg.PRIVATE_KEY == fake_pem.strip()
 
 
 @pytest.mark.unit

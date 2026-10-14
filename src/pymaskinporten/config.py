@@ -4,16 +4,21 @@ from azure.identity import DefaultAzureCredential
 from azure.keyvault.secrets import SecretClient
 from cryptography.hazmat.primitives.serialization import load_pem_private_key
 from dotenv import load_dotenv
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 
 class MaskinportenSecrets(BaseModel):
-    PRIVATE_KEY: str = Field(..., description="PEM string or file contents")
-    MASKINPORTEN_CLIENT_ID: str = Field(
-        ..., description="Client ID used for Maskinporten"
+    # Secrets copied from files or secret stores often carry a trailing newline
+    model_config = ConfigDict(str_strip_whitespace=True)
+
+    PRIVATE_KEY: str = Field(
+        ..., min_length=1, description="PEM string or file contents"
     )
-    KID: str = Field(..., description="Key ID used in JWT header")
-    SCOPE: str = Field(..., description="Space-delimited scopes")
+    MASKINPORTEN_CLIENT_ID: str = Field(
+        ..., min_length=1, description="Client ID used for Maskinporten"
+    )
+    KID: str = Field(..., min_length=1, description="Key ID used in JWT header")
+    SCOPE: str = Field(..., min_length=1, description="Space-delimited scopes")
 
     @field_validator("PRIVATE_KEY")
     def validate_private_key(cls, v: str) -> str:

@@ -73,3 +73,14 @@ def test_missing_sdk_raises_install_hint(monkeypatch):
 def test_secret_scope_is_required():
     with pytest.raises(ValueError, match="secret_scope"):
         config.load_config("databricks")
+
+
+@pytest.mark.unit
+def test_prefix_is_prepended(dbutils):
+    dbutils.secrets = {
+        (scope, f"mp-prod-{name}"): v for (scope, name), v in dbutils.secrets.items()
+    }
+
+    cfg = config.load_config("databricks", secret_scope=SCOPE_NAME, prefix="mp-prod-")
+
+    assert cfg.KID == "kid123"

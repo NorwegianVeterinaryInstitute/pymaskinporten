@@ -1,6 +1,6 @@
 import os
 
-from azure.core.exceptions import ResourceNotFoundError
+from azure.core.exceptions import AzureError, ResourceNotFoundError
 from azure.identity import DefaultAzureCredential
 from azure.keyvault.secrets import SecretClient
 from cryptography.hazmat.primitives.serialization import load_pem_private_key
@@ -143,6 +143,9 @@ def _load_azure_key_vault_secrets(key_vault_uri: str) -> dict[str, str]:
             value = client.get_secret(name).value
         except ResourceNotFoundError as e:
             raise RuntimeError(f"Missing required secret in Key Vault: {name}") from e
+        except AzureError as e:
+            # Sign-in and permission failures, e.g. a 403 from get_secret
+            raise RuntimeError(f"Could not read secret {name!r} from Key Vault") from e
         if value is None:
             raise RuntimeError(f"Missing required secret in Key Vault: {name}")
         config[key] = value

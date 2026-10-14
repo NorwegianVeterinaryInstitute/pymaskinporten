@@ -1,7 +1,11 @@
 from types import SimpleNamespace
 
 import pytest
-from azure.core.exceptions import ResourceNotFoundError
+from azure.core.exceptions import (
+    ClientAuthenticationError,
+    HttpResponseError,
+    ResourceNotFoundError,
+)
 
 from pymaskinporten import config
 
@@ -65,3 +69,25 @@ def test_missing_secret_raises_runtime_error(vault):
 def test_key_vault_uri_is_required():
     with pytest.raises(ValueError, match="key_vault_uri"):
         config.load_config("azure")
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize(
+    "error",
+    [
+        HttpResponseError("Forbidden: caller lacks secrets/get permission"),
+        ClientAuthenticationError("DefaultAzureCredential failed to retrieve a token"),
+    ],
+)
+def test_access_failure_raises_runtime_error(vault, monkeypatch, error):
+    def failing_get_secret(name):
+        raise error
+
+    monkeypatch.setattr(vault, "get_secret", failing_get_secret)
+
+    with pytest.raises(
+        RuntimeError, match="Could not read secret 'PRIVATE-KEY'"
+    ) as excinfo:
+        config.load_config("azure", key_vault_uri=VAULT)
+
+    assert excinfo.value.__cause__ is error

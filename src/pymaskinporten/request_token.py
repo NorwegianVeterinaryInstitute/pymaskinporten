@@ -79,22 +79,36 @@ def request_maskinporten_token(
 
     jwt_assertion = build_jwt(cfg, issuer_url)
 
-    response = httpx.post(
-        issuer_url,
-        data={
-            "grant_type": "urn:ietf:params:oauth:grant-type:jwt-bearer",
-            "assertion": jwt_assertion,
-        },
-        headers={"Content-Type": "application/x-www-form-urlencoded"},
-    )
-
-    if response.status_code == 200:
-        response_data = response.json()
-        access_token = response_data.get("access_token")
-        expires_in = response_data.get("expires_in")
-        print(
-            f"Access token for {cfg.SCOPE} in {api_env} environment fetched successfully."
+    try:
+        response = httpx.post(
+            issuer_url,
+            data={
+                "grant_type": "urn:ietf:params:oauth:grant-type:jwt-bearer",
+                "assertion": jwt_assertion,
+            },
+            headers={"Content-Type": "application/x-www-form-urlencoded"},
         )
-        return access_token, expires_in
-    else:
+    except httpx.HTTPError as e:
+        raise MaskinportenTokenError(f"Request to {issuer_url} failed: {e}") from e
+
+    if response.status_code != 200:
         raise MaskinportenTokenError(f"Error {response.status_code}: {response.text}")
+
+    try:
+        response_data = response.json()
+        access_token = response_data["access_token"]
+        expires_in = response_data["expires_in"]
+    except (ValueError, KeyError, TypeError) as e:
+        raise MaskinportenTokenError(
+            f"Unexpected token response from {issuer_url}"
+        ) from e
+
+    if not (
+        isinstance(access_token, str) and access_token and isinstance(expires_in, int)
+    ):
+        raise MaskinportenTokenError(f"Unexpected token response from {issuer_url}")
+
+    print(
+        f"Access token for {cfg.SCOPE} in {api_env} environment fetched successfully."
+    )
+    return access_token, expires_in

@@ -70,6 +70,27 @@ def test_missing_sdk_raises_install_hint(monkeypatch):
 
 
 @pytest.mark.unit
+def test_unconfigured_sdk_outside_databricks_raises_runtime_error(
+    monkeypatch, tmp_path
+):
+    # Outside Databricks, importing databricks.sdk.runtime builds a remote client and
+    # raises ValueError when no authentication is configured
+    (tmp_path / "runtime.py").write_text(
+        'raise ValueError("default auth: cannot configure default credentials")\n'
+    )
+    sdk = ModuleType("databricks.sdk")
+    sdk.__path__ = [str(tmp_path)]
+    monkeypatch.setitem(sys.modules, "databricks", ModuleType("databricks"))
+    monkeypatch.setitem(sys.modules, "databricks.sdk", sdk)
+    monkeypatch.delitem(sys.modules, "databricks.sdk.runtime", raising=False)
+
+    with pytest.raises(RuntimeError, match="Databricks authentication") as excinfo:
+        config.load_config("databricks", secret_scope=SCOPE_NAME)
+
+    assert isinstance(excinfo.value.__cause__, ValueError)
+
+
+@pytest.mark.unit
 def test_secret_scope_is_required():
     with pytest.raises(ValueError, match="secret_scope"):
         config.load_config("databricks")

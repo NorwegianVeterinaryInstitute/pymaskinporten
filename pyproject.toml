@@ -25,7 +25,7 @@ Documentation = "https://norwegianveterinaryinstitute.github.io/pymaskinporten"
 
 
 [project.scripts]
-maskinporten_web = "pymaskinporten.app:main"
+maskinporten-web = "pymaskinporten.app:main"
 pymaskinporten = "pymaskinporten:main"
 
 [dependency-groups]

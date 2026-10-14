@@ -27,6 +27,11 @@ Documentation = "https://norwegianveterinaryinstitute.github.io/pymaskinporten"
 [project.scripts]
 maskinporten-web = "pymaskinporten.app:main"
 
+[project.optional-dependencies]
+aws = [
+    "boto3>=1.26",
+]
+
 [dependency-groups]
 dev = [
   "pytest>=9.0.0",

@@ -91,3 +91,12 @@ def test_access_failure_raises_runtime_error(vault, monkeypatch, error):
         config.load_config("azure", key_vault_uri=VAULT)
 
     assert excinfo.value.__cause__ is error
+
+
+@pytest.mark.unit
+def test_prefix_is_prepended(vault):
+    vault.secrets = {f"mp-prod-{name}": v for name, v in vault.secrets.items()}
+
+    cfg = config.load_config("azure", key_vault_uri=VAULT, prefix="mp-prod-")
+
+    assert cfg.KID == "kid123"

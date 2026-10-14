@@ -40,6 +40,7 @@ def load_config(
     secret_scope: str | None = None,
     key_vault_uri: str | None = None,
     region: str | None = None,
+    prefix: str = "",
 ) -> MaskinportenSecrets:
     """
     Loads and validates Maskinporten credentials.
@@ -57,6 +58,9 @@ def load_config(
         secret_scope: The Databricks secret scope. Required for "databricks".
         key_vault_uri: The Key Vault URL. Required for "azure".
         region: The AWS region for "aws". Defaults to boto3's configured region.
+        prefix: Prepended as-is to every environment variable or secret name, e.g.
+            "PROD_" for "local" (reads PROD_KID), "maskinporten/prod/" for AWS or
+            "maskinporten-prod-" for Key Vault. Use characters the source allows.
 
     Returns:
         MaskinportenSecrets: The validated credentials.
@@ -70,23 +74,23 @@ def load_config(
         load_config()
         load_config("azure", key_vault_uri="https://my-vault.vault.azure.net/")
         load_config("databricks", secret_scope="maskinporten")
-        load_config("aws", region="eu-north-1")
+        load_config("aws", region="eu-north-1", prefix="maskinporten/prod/")
     """
     if deployment == "local":
-        raw = _load_local_env()
+        raw = _load_local_env(prefix)
 
     elif deployment == "databricks":
         if not secret_scope:
             raise ValueError("secret_scope is required for Databricks")
-        raw = _load_databricks_secrets(secret_scope)
+        raw = _load_databricks_secrets(secret_scope, prefix)
 
     elif deployment == "azure":
         if not key_vault_uri:
             raise ValueError("key_vault_uri is required for Azure Key Vault")
-        raw = _load_azure_key_vault_secrets(key_vault_uri)
+        raw = _load_azure_key_vault_secrets(key_vault_uri, prefix)
 
     elif deployment == "aws":
-        raw = _load_aws_secrets(region)
+        raw = _load_aws_secrets(region, prefix)
 
     else:
         raise ValueError(f"Unknown deployment type: {deployment}")
@@ -94,25 +98,26 @@ def load_config(
     return MaskinportenSecrets(**raw)
 
 
-def _load_local_env() -> dict[str, str]:
+def _load_local_env(prefix: str) -> dict[str, str]:
     """Load secret config from environment variables."""
     config: dict[str, str] = {}
 
     for key in MaskinportenSecrets.model_fields:
-        value = os.getenv(key)
+        name = prefix + key
+        value = os.getenv(name)
         if value is None:
-            raise RuntimeError(f"Missing required environment variable: {key}")
+            raise RuntimeError(f"Missing required environment variable: {name}")
         config[key] = value
 
     return config
 
 
-def _secret_name(field: str) -> str:
+def _secret_name(field: str, prefix: str) -> str:
     """Name of a config field in a secret store; Key Vault allows only [0-9a-zA-Z-]."""
-    return field.replace("_", "-")
+    return prefix + field.replace("_", "-")
 
 
-def _load_databricks_secrets(secret_scope: str) -> dict[str, str]:
+def _load_databricks_secrets(secret_scope: str, prefix: str) -> dict[str, str]:
     """Load secret config from Databricks Secrets."""
     try:
         from databricks.sdk.runtime import dbutils  # ty: ignore[unresolved-import]
@@ -124,7 +129,7 @@ def _load_databricks_secrets(secret_scope: str) -> dict[str, str]:
     config: dict[str, str] = {}
 
     for key in MaskinportenSecrets.model_fields:
-        name = _secret_name(key)
+        name = _secret_name(key, prefix)
         try:
             value = dbutils.secrets.get(scope=secret_scope, key=name)
         except Exception as e:
@@ -137,7 +142,7 @@ def _load_databricks_secrets(secret_scope: str) -> dict[str, str]:
     return config
 
 
-def _load_azure_key_vault_secrets(key_vault_uri: str) -> dict[str, str]:
+def _load_azure_key_vault_secrets(key_vault_uri: str, prefix: str) -> dict[str, str]:
     """Load secret config from Azure Key Vault."""
     config: dict[str, str] = {}
 
@@ -146,7 +151,7 @@ def _load_azure_key_vault_secrets(key_vault_uri: str) -> dict[str, str]:
     client = SecretClient(vault_url=key_vault_uri, credential=credential)
 
     for key in MaskinportenSecrets.model_fields:
-        name = _secret_name(key)
+        name = _secret_name(key, prefix)
         try:
             value = client.get_secret(name).value
         except ResourceNotFoundError as e:
@@ -161,7 +166,7 @@ def _load_azure_key_vault_secrets(key_vault_uri: str) -> dict[str, str]:
     return config
 
 
-def _load_aws_secrets(region: str | None) -> dict[str, str]:
+def _load_aws_secrets(region: str | None, prefix: str) -> dict[str, str]:
     """Load secret config from AWS Secrets Manager."""
     try:
         import boto3
@@ -179,7 +184,7 @@ def _load_aws_secrets(region: str | None) -> dict[str, str]:
     config: dict[str, str] = {}
 
     for key in MaskinportenSecrets.model_fields:
-        name = _secret_name(key)
+        name = _secret_name(key, prefix)
         try:
             value = client.get_secret_value(SecretId=name).get("SecretString")
         except Exception as e:

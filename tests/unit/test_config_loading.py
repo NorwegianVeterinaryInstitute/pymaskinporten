@@ -51,3 +51,27 @@ def test_surrounding_whitespace_is_stripped(real_private_key_pem):
     assert cfg.SCOPE == "scope:a"
     # The stripped PEM key still signs
     build_jwt(cfg, "https://test.maskinporten.no/token")
+
+
+@pytest.mark.unit
+def test_prefix_selects_prefixed_env_vars(monkeypatch, fake_pem):
+    monkeypatch.setenv("PROD_PRIVATE_KEY", fake_pem)
+    monkeypatch.setenv("PROD_MASKINPORTEN_CLIENT_ID", "prod-client")
+    monkeypatch.setenv("PROD_KID", "prod-kid")
+    monkeypatch.setenv("PROD_SCOPE", "prod:scope")
+    monkeypatch.setenv("KID", "unprefixed-kid")
+
+    cfg = load_config(prefix="PROD_")
+
+    assert cfg.MASKINPORTEN_CLIENT_ID == "prod-client"
+    assert cfg.KID == "prod-kid"
+
+
+@pytest.mark.unit
+def test_missing_prefixed_env_var_names_it(monkeypatch, fake_pem):
+    for key in ("PRIVATE_KEY", "MASKINPORTEN_CLIENT_ID", "KID", "SCOPE"):
+        monkeypatch.setenv(key, "unprefixed")
+        monkeypatch.delenv(f"PROD_{key}", raising=False)
+
+    with pytest.raises(RuntimeError, match="PROD_PRIVATE_KEY"):
+        load_config(prefix="PROD_")

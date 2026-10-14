@@ -105,3 +105,14 @@ def test_missing_sdk_raises_install_hint(monkeypatch):
 
     with pytest.raises(RuntimeError, match=r"pymaskinporten\[aws\]"):
         config.load_config("aws")
+
+
+@pytest.mark.unit
+def test_prefix_is_prepended(secretsmanager):
+    secretsmanager.secrets = {
+        f"maskinporten/prod/{name}": v for name, v in secretsmanager.secrets.items()
+    }
+
+    cfg = config.load_config("aws", prefix="maskinporten/prod/")
+
+    assert cfg.KID == "kid123"

@@ -65,7 +65,7 @@ def test_missing_sdk_raises_install_hint(monkeypatch):
     # A None entry in sys.modules makes the import fail, as if the package were missing
     monkeypatch.setitem(sys.modules, "databricks.sdk.runtime", None)
 
-    with pytest.raises(RuntimeError, match="databricks-sdk"):
+    with pytest.raises(RuntimeError, match=r"pymaskinporten\[databricks\]"):
         config.load_config("databricks", secret_scope=SCOPE_NAME)
 
 

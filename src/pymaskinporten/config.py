@@ -1,5 +1,6 @@
 import os
 
+from azure.core.exceptions import ResourceNotFoundError
 from azure.identity import DefaultAzureCredential
 from azure.keyvault.secrets import SecretClient
 from cryptography.hazmat.primitives.serialization import load_pem_private_key
@@ -84,6 +85,11 @@ def _load_databricks_secrets(secret_scope: str) -> dict[str, str]:
     return config
 
 
+def _key_vault_name(field: str) -> str:
+    """Key Vault secret name for a config field; Key Vault allows only [0-9a-zA-Z-]."""
+    return field.replace("_", "-")
+
+
 def _load_azure_key_vault_secrets(key_vault_uri: str) -> dict[str, str]:
     """Load secret config from Azure Key Vault."""
     config: dict[str, str] = {}
@@ -93,9 +99,13 @@ def _load_azure_key_vault_secrets(key_vault_uri: str) -> dict[str, str]:
     client = SecretClient(vault_url=key_vault_uri, credential=credential)
 
     for key in MaskinportenSecrets.model_fields:
-        value = client.get_secret(key).value
+        name = _key_vault_name(key)
+        try:
+            value = client.get_secret(name).value
+        except ResourceNotFoundError as e:
+            raise RuntimeError(f"Missing required secret in Key Vault: {name}") from e
         if value is None:
-            raise RuntimeError(f"Missing required secret in Key Vault: {key}")
+            raise RuntimeError(f"Missing required secret in Key Vault: {name}")
         config[key] = value
 
     return config

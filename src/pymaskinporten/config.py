@@ -72,22 +72,34 @@ def _load_local_env() -> dict[str, str]:
     return config
 
 
+def _secret_name(field: str) -> str:
+    """Name of a config field in a secret store; Key Vault allows only [0-9a-zA-Z-]."""
+    return field.replace("_", "-")
+
+
 def _load_databricks_secrets(secret_scope: str) -> dict[str, str]:
     """Load secret config from Databricks Secrets."""
+    try:
+        from databricks.sdk.runtime import dbutils  # ty: ignore[unresolved-import]
+    except ImportError as e:
+        raise RuntimeError(
+            "Databricks secrets need the databricks-sdk package: pip install databricks-sdk"
+        ) from e
+
     config: dict[str, str] = {}
 
     for key in MaskinportenSecrets.model_fields:
-        value = dbutils.secrets.get(scope=secret_scope, key=key)  # noqa: F821 # type: ignore
-        if value is None:
-            raise RuntimeError(f"Missing required secret in Key Vault: {key}")
+        name = _secret_name(key)
+        try:
+            value = dbutils.secrets.get(scope=secret_scope, key=name)
+        except Exception as e:
+            # The error type differs between notebooks and the SDK's remote client
+            raise RuntimeError(
+                f"Could not read secret {name!r} from Databricks scope {secret_scope!r}"
+            ) from e
         config[key] = value
 
     return config
-
-
-def _key_vault_name(field: str) -> str:
-    """Key Vault secret name for a config field; Key Vault allows only [0-9a-zA-Z-]."""
-    return field.replace("_", "-")
 
 
 def _load_azure_key_vault_secrets(key_vault_uri: str) -> dict[str, str]:
@@ -99,7 +111,7 @@ def _load_azure_key_vault_secrets(key_vault_uri: str) -> dict[str, str]:
     client = SecretClient(vault_url=key_vault_uri, credential=credential)
 
     for key in MaskinportenSecrets.model_fields:
-        name = _key_vault_name(key)
+        name = _secret_name(key)
         try:
             value = client.get_secret(name).value
         except ResourceNotFoundError as e:

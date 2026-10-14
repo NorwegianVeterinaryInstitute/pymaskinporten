@@ -7,7 +7,7 @@ try:
     from flask import Flask, jsonify, render_template, request
 except ImportError as e:
     raise ImportError(
-        "The maskinporten-web demo app needs the web extra: "
+        "The pymaskinporten-web demo app needs the web extra: "
         "pip install pymaskinporten[web]"
     ) from e
 

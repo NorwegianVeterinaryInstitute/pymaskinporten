@@ -147,6 +147,6 @@ Then open <http://127.0.0.1:5000>.
 
 > [!WARNING]
 > The demo app is for local testing only. Its `/token` endpoint returns real access tokens
-> (including prod) without any authentication. `maskinporten-web` listens on `127.0.0.1` by
+> (including prod) without any authentication. `pymaskinporten-web` listens on `127.0.0.1` by
 > default, but inside the Docker image it listens on all interfaces, so always publish the port
 > with the `127.0.0.1:` prefix as shown above.

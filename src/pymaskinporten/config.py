@@ -40,6 +40,7 @@ def load_config(
     secret_scope: str | None = None,
     key_vault_uri: str | None = None,
     region: str | None = None,
+    project_id: str | None = None,
     prefix: str = "",
 ) -> MaskinportenSecrets:
     """
@@ -55,9 +56,13 @@ def load_config(
             needs the databricks-sdk package.
             "aws" reads the same dashed secret names from AWS Secrets Manager, signing in
             with boto3's default credential chain; needs pymaskinporten[aws].
+            "gcp" reads the same dashed secret names (latest version) from Google Secret
+            Manager, signing in with Application Default Credentials; needs
+            pymaskinporten[gcp].
         secret_scope: The Databricks secret scope. Required for "databricks".
         key_vault_uri: The Key Vault URL. Required for "azure".
         region: The AWS region for "aws". Defaults to boto3's configured region.
+        project_id: The Google Cloud project ID. Required for "gcp".
         prefix: Prepended as-is to every environment variable or secret name, e.g.
             "PROD_" for "local" (reads PROD_KID), "maskinporten/prod/" for AWS or
             "maskinporten-prod-" for Key Vault. Use characters the source allows.
@@ -75,6 +80,7 @@ def load_config(
         load_config("azure", key_vault_uri="https://my-vault.vault.azure.net/")
         load_config("databricks", secret_scope="maskinporten")
         load_config("aws", region="eu-north-1", prefix="maskinporten/prod/")
+        load_config("gcp", project_id="my-project", prefix="maskinporten-prod-")
     """
     if deployment == "local":
         raw = _load_local_env(prefix)
@@ -91,6 +97,11 @@ def load_config(
 
     elif deployment == "aws":
         raw = _load_aws_secrets(region, prefix)
+
+    elif deployment == "gcp":
+        if not project_id:
+            raise ValueError("project_id is required for Google Secret Manager")
+        raw = _load_gcp_secrets(project_id, prefix)
 
     else:
         raise ValueError(f"Unknown deployment type: {deployment}")
@@ -198,5 +209,38 @@ def _load_aws_secrets(region: str | None, prefix: str) -> dict[str, str]:
                 f"Secret {name!r} in AWS Secrets Manager has no string value"
             )
         config[key] = value
+
+    return config
+
+
+def _load_gcp_secrets(project_id: str, prefix: str) -> dict[str, str]:
+    """Load secret config from Google Secret Manager."""
+    try:
+        from google.cloud import secretmanager
+    except ImportError as e:
+        raise RuntimeError(
+            "Google Secret Manager needs google-cloud-secret-manager: "
+            "pip install pymaskinporten[gcp]"
+        ) from e
+
+    try:
+        client = secretmanager.SecretManagerServiceClient()
+    except Exception as e:
+        # e.g. DefaultCredentialsError when no Application Default Credentials are set
+        raise RuntimeError("Could not create the Google Secret Manager client") from e
+
+    config: dict[str, str] = {}
+
+    for key in MaskinportenSecrets.model_fields:
+        name = _secret_name(key, prefix)
+        path = f"projects/{project_id}/secrets/{name}/versions/latest"
+        try:
+            response = client.access_secret_version(name=path)
+            config[key] = response.payload.data.decode("utf-8")
+        except Exception as e:
+            # google.api_core raises NotFound, PermissionDenied and similar
+            raise RuntimeError(
+                f"Could not read secret {name!r} from Google Secret Manager"
+            ) from e
 
     return config

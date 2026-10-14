@@ -50,7 +50,7 @@ def load_config(
             "azure" reads the Key Vault secrets PRIVATE-KEY, MASKINPORTEN-CLIENT-ID, KID and
             SCOPE, signing in with DefaultAzureCredential; needs pymaskinporten[azure].
             "databricks" reads the same dashed secret names from a Databricks secret scope;
-            needs the databricks-sdk package.
+            needs pymaskinporten[databricks].
             "aws" reads the same dashed secret names from AWS Secrets Manager, signing in
             with boto3's default credential chain; needs pymaskinporten[aws].
             "gcp" reads the same dashed secret names (latest version) from Google Secret
@@ -128,10 +128,10 @@ def _secret_name(field: str, prefix: str) -> str:
 def _load_databricks_secrets(secret_scope: str, prefix: str) -> dict[str, str]:
     """Load secret config from Databricks Secrets."""
     try:
-        from databricks.sdk.runtime import dbutils  # ty: ignore[unresolved-import]
+        from databricks.sdk.runtime import dbutils
     except ImportError as e:
         raise RuntimeError(
-            "Databricks secrets need the databricks-sdk package: pip install databricks-sdk"
+            "Databricks secrets need databricks-sdk: pip install pymaskinporten[databricks]"
         ) from e
 
     config: dict[str, str] = {}

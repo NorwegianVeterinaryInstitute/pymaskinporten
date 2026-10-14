@@ -36,6 +36,9 @@ aws = [
 gcp = [
     "google-cloud-secret-manager>=2.16",
 ]
+databricks = [
+    "databricks-sdk>=0.20",
+]
 
 [dependency-groups]
 dev = [

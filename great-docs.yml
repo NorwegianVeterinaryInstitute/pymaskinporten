@@ -71,18 +71,17 @@ funding:
 # - Add 'desc:' to sections for descriptions
 
 reference:
-  - title: Functions
-    desc: Utility functions
+  - title: Tokens
+    desc: Request a Maskinporten access token
     contents:
-      - app.after_request
-      - app.get_token
-      - app.index
-      - app.load_config
-      - app.main
-      - app.request_maskinporten_token
-      - request_token.build_jwt
-      - request_token.load_config
       - request_token.request_maskinporten_token
+      - request_token.build_jwt
+      - request_token.MaskinportenTokenError
+  - title: Configuration
+    desc: Load and validate credentials
+    contents:
+      - config.load_config
+      - config.MaskinportenSecrets
 
 # Site Settings
 # -------------

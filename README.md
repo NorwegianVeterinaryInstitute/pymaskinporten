@@ -24,6 +24,24 @@ graph LR
   Consumer -- use token ---> Service["External Service"]
 ```
 
+## Installation
+
+```bash
+pip install pymaskinporten
+```
+
+Optional extras add the secret-store SDKs and the demo app:
+
+| Extra        | Adds                                |
+|--------------|-------------------------------------|
+| `azure`      | Azure Key Vault loader              |
+| `databricks` | Databricks secrets loader           |
+| `aws`        | AWS Secrets Manager loader          |
+| `gcp`        | Google Secret Manager loader        |
+| `web`        | The `pymaskinporten-web` demo app   |
+
+For example: `pip install "pymaskinporten[azure,web]"`.
+
 ## Example usage
 
 This assumes you have created the integration at Digdir and have its private key (PEM), key ID,
@@ -54,8 +72,8 @@ access_token, expires_in = request_maskinporten_token("prod", config=config)
 
 | Store                 | Call                                                         | Install                              |
 |-----------------------|--------------------------------------------------------------|--------------------------------------|
-| Azure Key Vault       | `load_config("azure", key_vault_uri="https://...")`          | included                             |
-| Databricks secrets    | `load_config("databricks", secret_scope="maskinporten")`     | `pip install databricks-sdk`         |
+| Azure Key Vault       | `load_config("azure", key_vault_uri="https://...")`          | `pip install "pymaskinporten[azure]"` |
+| Databricks secrets    | `load_config("databricks", secret_scope="maskinporten")`     | `pip install "pymaskinporten[databricks]"` |
 | AWS Secrets Manager   | `load_config("aws", region="eu-north-1")`                    | `pip install "pymaskinporten[aws]"`  |
 | Google Secret Manager | `load_config("gcp", project_id="my-project")`                | `pip install "pymaskinporten[gcp]"`  |
 
@@ -113,7 +131,8 @@ access_token, expires_in = request_maskinporten_token("prod", config=secrets)
 ### Using a `.env` file
 
 By default, `load_config()` reads environment variables only. To keep the credentials in a `.env`
-file, load it before requesting a token:
+file, install `python-dotenv` (`pip install python-dotenv`) and load it before requesting a
+token:
 
 ```python
 from dotenv import load_dotenv
@@ -125,7 +144,9 @@ The demo app below does this for you.
 
 ## Docker container 
 
-If you want to test the library through a web browser the image opens a `flask` app:
+To test the library in a web browser, use the `pymaskinporten-web` demo app (a `flask` app).
+Run it locally with `pip install "pymaskinporten[web]"` and `pymaskinporten-web`, or use the
+Docker image:
 
 ```bash
 cat > .env <<EOF

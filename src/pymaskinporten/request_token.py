@@ -35,8 +35,6 @@ def build_jwt(cfg: MaskinportenSecrets, issuer_url: str) -> str:
     """
 
     header = {"kid": cfg.KID}
-    if not header["kid"]:
-        raise ValueError("JWK must include 'kid'.")
 
     payload = {
         "aud": issuer_url,

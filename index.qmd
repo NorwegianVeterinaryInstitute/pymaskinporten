@@ -26,7 +26,7 @@ os.environ["SCOPE"] = "your_scope"
 
 # get the access token
 from pymaskinporten.request_token import request_maskinporten_token
-access_token, expires_in = request_maskinporten_token("my_api", "test")
+access_token, expires_in = request_maskinporten_token("test")
 print(f"Access Token: {access_token}")
 print(f"Expires In: {expires_in} seconds")
 ```
@@ -37,12 +37,25 @@ If you want to test the library through a web browser the image opens a `flask` 
 
 ```bash
 cat > .env <<EOF
->PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\n...\n-----END PRIVATE KEY-----\n"
->MASKINPORTEN_CLIENT_ID="your-client-id"
->KID="your-kid"
->SCOPE="your-scope"
->STRICT_KEY_VALIDATION=false
->EOF
+MASKINPORTEN_CLIENT_ID=your-client-id
+KID=your-kid
+SCOPE=your-scope
+EOF
 
-docker run -p 5000:5000 --env-file .env ghcr.io/norwegianveterinaryinstitute/pymaskinporten:main
+docker run -p 127.0.0.1:5000:5000 --env-file .env \
+  -e PRIVATE_KEY="$(cat private_key.pem)" \
+  ghcr.io/norwegianveterinaryinstitute/pymaskinporten:main
 ```
+
+`--env-file` keeps quotes as part of the value and doesn't support multi-line values, so leave
+the values unquoted and pass the PEM key with `-e`. In PowerShell, use
+`-e PRIVATE_KEY="$(Get-Content -Raw private_key.pem)"`.
+
+Then open <http://127.0.0.1:5000>.
+
+::: {.callout-warning}
+The demo app is for local testing only. Its `/token` endpoint returns real access tokens
+(including prod) without any authentication. `maskinporten-web` listens on `127.0.0.1` by
+default, but inside the Docker image it listens on all interfaces, so always publish the port
+with the `127.0.0.1:` prefix as shown above.
+:::

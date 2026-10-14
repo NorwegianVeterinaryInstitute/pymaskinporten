@@ -74,7 +74,9 @@ def main():
         "yes",
         "on",
     )
-    app.run(debug=debug_enabled, host="0.0.0.0")
+    # /token hands out real tokens without auth, so stay local unless told otherwise
+    host = os.getenv("FLASK_RUN_HOST", "127.0.0.1")
+    app.run(debug=debug_enabled, host=host)
 
 
 if __name__ == "__main__":

@@ -49,5 +49,7 @@ RUN rm -rf /media /mnt /boot /home /opt /srv /var
 COPY --from=builder /app/ /app/
 
 ENV PATH=/app/bin:$PATH
+# Listen on all interfaces inside the container; publish to 127.0.0.1 on the host
+ENV FLASK_RUN_HOST=0.0.0.0
 
 ENTRYPOINT ["maskinporten-web"]

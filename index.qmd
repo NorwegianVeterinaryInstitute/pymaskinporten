@@ -65,8 +65,11 @@ Secret stores use dashes in the names, because Key Vault doesn't allow underscor
 credentials can live side by side:
 
 ```python
-load_config(prefix="PROD_")                         # reads PROD_PRIVATE_KEY, PROD_KID, ...
-load_config("aws", prefix="maskinporten/prod/")     # reads maskinporten/prod/PRIVATE-KEY, ...
+# Reads PROD_PRIVATE_KEY, PROD_KID, ...
+load_config(prefix="PROD_")
+
+# Reads maskinporten/prod/PRIVATE-KEY, ...
+load_config("aws", prefix="maskinporten/prod/")
 ```
 
 The prefix is used as-is, so use only characters the source allows (besides letters and digits):

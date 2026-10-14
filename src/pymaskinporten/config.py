@@ -3,7 +3,6 @@ import os
 from azure.identity import DefaultAzureCredential
 from azure.keyvault.secrets import SecretClient
 from cryptography.hazmat.primitives.serialization import load_pem_private_key
-from dotenv import load_dotenv
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 
@@ -41,7 +40,6 @@ def load_config(
     key_vault_uri: str | None = None,
 ) -> MaskinportenSecrets:
     if deployment == "local":
-        load_dotenv()
         raw = _load_local_env()
 
     elif deployment == "databricks":

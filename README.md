@@ -41,10 +41,36 @@ access_token, expires_in = request_maskinporten_token("test")  # or "prod"
 `api_env` must be `"test"` or `"prod"`; anything else raises `ValueError`. A failed token request
 raises `MaskinportenTokenError`.
 
+### Secret stores
+
+`load_config()` can also read the credentials from Azure Key Vault or Databricks secrets. Pass the
+result with `config=`:
+
+```python
+from pymaskinporten import load_config, request_maskinporten_token
+
+config = load_config("azure", key_vault_uri="https://my-vault.vault.azure.net/")
+# or: config = load_config("databricks", secret_scope="maskinporten")
+access_token, expires_in = request_maskinporten_token("prod", config=config)
+```
+
+Secret stores use dashes in the names, because Key Vault doesn't allow underscores:
+
+| Credential        | Environment variable     | Secret name              |
+|-------------------|--------------------------|--------------------------|
+| Private key (PEM) | `PRIVATE_KEY`            | `PRIVATE-KEY`            |
+| Client ID         | `MASKINPORTEN_CLIENT_ID` | `MASKINPORTEN-CLIENT-ID` |
+| Key ID            | `KID`                    | `KID`                    |
+| Scope             | `SCOPE`                  | `SCOPE`                  |
+
+- **Azure Key Vault** signs in with `DefaultAzureCredential` (managed identity, environment
+  variables or an Azure CLI login).
+- **Databricks** reads the given secret scope through `databricks.sdk.runtime.dbutils` and needs
+  `pip install databricks-sdk`.
+
 ### Passing credentials directly
 
-To use credentials from somewhere else, such as a secret store, build them yourself and pass them
-with `config=`:
+To use credentials from anywhere else, build them yourself and pass them with `config=`:
 
 ```python
 from pymaskinporten import MaskinportenSecrets, request_maskinporten_token

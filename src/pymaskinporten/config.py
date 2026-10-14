@@ -40,6 +40,33 @@ def load_config(
     secret_scope: str | None = None,
     key_vault_uri: str | None = None,
 ) -> MaskinportenSecrets:
+    """
+    Loads and validates Maskinporten credentials.
+
+    Args:
+        deployment: Where to read the credentials from:
+            "local" reads the environment variables PRIVATE_KEY, MASKINPORTEN_CLIENT_ID, KID
+            and SCOPE.
+            "azure" reads the Key Vault secrets PRIVATE-KEY, MASKINPORTEN-CLIENT-ID, KID and
+            SCOPE, signing in with DefaultAzureCredential.
+            "databricks" reads the same dashed secret names from a Databricks secret scope;
+            needs the databricks-sdk package.
+        secret_scope: The Databricks secret scope. Required for "databricks".
+        key_vault_uri: The Key Vault URL. Required for "azure".
+
+    Returns:
+        MaskinportenSecrets: The validated credentials.
+
+    Raises:
+        ValueError: If `deployment` is unknown or its required argument is missing.
+        RuntimeError: If a credential is missing or can't be read.
+        pydantic.ValidationError: If a credential is blank or invalid.
+
+    Examples:
+        load_config()
+        load_config("azure", key_vault_uri="https://my-vault.vault.azure.net/")
+        load_config("databricks", secret_scope="maskinporten")
+    """
     if deployment == "local":
         raw = _load_local_env()
 

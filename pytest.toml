@@ -13,16 +13,8 @@ python_functions = ["test_*"]
 # Add verbose summary for skipped/xfailed tests
 addopts = ["-ra"]
 
-# Suppress noisy warnings from dependencies
-filterwarnings = [
-    "ignore::DeprecationWarning",
-    "ignore::UserWarning"
-]
-
-# Default environment variables for ALL tests
-env = [
-    "STRICT_KEY_VALIDATION=false"
-]
+# Fail on unknown config options, unregistered markers and similar mistakes
+strict = true
 
 # Custom markers
 markers = [

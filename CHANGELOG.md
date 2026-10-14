@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.1.4](https://github.com/NorwegianVeterinaryInstitute/pymaskinporten/compare/v1.1.3...v1.1.4) (2026-10-14)
+
+
+### Bug Fixes
+
+* Docker entrypoint, README example, and local-only demo bind ([#119](https://github.com/NorwegianVeterinaryInstitute/pymaskinporten/issues/119)) ([8c6e9b6](https://github.com/NorwegianVeterinaryInstitute/pymaskinporten/commit/8c6e9b645eb5a066d1bd69c16f27d118bcab474f)), closes [#113](https://github.com/NorwegianVeterinaryInstitute/pymaskinporten/issues/113)
+
 ## [1.1.3](https://github.com/NorwegianVeterinaryInstitute/pymaskinporten/compare/v1.1.2...v1.1.3) (2026-10-13)
 
 

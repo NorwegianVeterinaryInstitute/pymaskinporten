@@ -75,7 +75,7 @@
 * update docs to use great-docs. ([da3ebb0](https://github.com/NorwegianVeterinaryInstitute/pymaskinporten/commit/da3ebb0629556543a23adba02b79fbdadf0c73d9))
 * update docs to use great-docs. ([fdbbf50](https://github.com/NorwegianVeterinaryInstitute/pymaskinporten/commit/fdbbf50c2c6823a12f43338cfee4f538015104e6))
 
-## [1.1.1](https://github.com/NorwegianVeterinaryInstitute/pymaskinporten/compare/pymaskinporten-v1.1.0...pymaskinporten-v1.1.1) (2026-03-12)
+## [1.1.1](https://github.com/NorwegianVeterinaryInstitute/pymaskinporten/compare/v1.1.0...v1.1.1) (2026-03-12)
 
 
 ### Bug Fixes
@@ -95,7 +95,7 @@
 * add GitHub Actions workflow for building and deploying document… ([f0bf9c8](https://github.com/NorwegianVeterinaryInstitute/pymaskinporten/commit/f0bf9c827d20d44ee578f1b8803bc9991dc0f64d))
 * add GitHub Actions workflow for building and deploying documentation to GitHub Pages ([94e4863](https://github.com/NorwegianVeterinaryInstitute/pymaskinporten/commit/94e48634c61963da2aa7409ab2dc2d412778ef64))
 
-## [1.1.0](https://github.com/NorwegianVeterinaryInstitute/pymaskinporten/compare/pymaskinporten-v1.0.0...pymaskinporten-v1.1.0) (2026-03-12)
+## [1.1.0](https://github.com/NorwegianVeterinaryInstitute/pymaskinporten/compare/v1.0.0...v1.1.0) (2026-03-12)
 
 
 ### Features
@@ -103,7 +103,7 @@
 * add azure key valut logic for config ([b128692](https://github.com/NorwegianVeterinaryInstitute/pymaskinporten/commit/b12869278e0010ff5ff26c61d85d0808a72ef0df))
 * add azure key valut logic for config ([c8c25de](https://github.com/NorwegianVeterinaryInstitute/pymaskinporten/commit/c8c25ded73ff34f6da96b9218d86122820e5b0d5))
 
-## [1.0.0](https://github.com/NorwegianVeterinaryInstitute/py_maskinporten/compare/pymaskinporten-v0.11.0...pymaskinporten-v1.0.0) (2026-03-09)
+## [1.0.0](https://github.com/NorwegianVeterinaryInstitute/py_maskinporten/compare/v0.11.0...v1.0.0) (2026-03-09)
 
 
 ### ⚠ BREAKING CHANGES
@@ -132,7 +132,7 @@
 * update README.md ([40ee683](https://github.com/NorwegianVeterinaryInstitute/py_maskinporten/commit/40ee683475508387f5e1d99da6fc86a1f6bef2f8))
 * Update README.md ([a1f8eda](https://github.com/NorwegianVeterinaryInstitute/py_maskinporten/commit/a1f8edac704b4dc479d80c1e82712bf6abcf9421))
 
-## [0.11.0](https://github.com/NorwegianVeterinaryInstitute/py_maskinporten/compare/py_maskinporten-v0.10.5...py_maskinporten-v0.11.0) (2026-03-09)
+## [0.11.0](https://github.com/NorwegianVeterinaryInstitute/py_maskinporten/compare/v0.10.5...v0.11.0) (2026-03-09)
 
 
 ### Features
@@ -145,42 +145,42 @@
 
 * don't set the env vars in dockerfile ([b569cc1](https://github.com/NorwegianVeterinaryInstitute/py_maskinporten/commit/b569cc10fb7b6fe666b1f84a296b6a66346a9127))
 
-## [0.10.5](https://github.com/NorwegianVeterinaryInstitute/py_maskinporten/compare/py_maskinporten-v0.10.4...py_maskinporten-v0.10.5) (2026-03-06)
+## [0.10.5](https://github.com/NorwegianVeterinaryInstitute/py_maskinporten/compare/v0.10.4...v0.10.5) (2026-03-06)
 
 
 ### Bug Fixes
 
 * update dependencies in toml ([c1ab5ff](https://github.com/NorwegianVeterinaryInstitute/py_maskinporten/commit/c1ab5ff201b50576a6c0adee1c22eb1200ad496d))
 
-## [0.10.4](https://github.com/NorwegianVeterinaryInstitute/py_maskinporten/compare/py_maskinporten-v0.10.3...py_maskinporten-v0.10.4) (2026-03-06)
+## [0.10.4](https://github.com/NorwegianVeterinaryInstitute/py_maskinporten/compare/v0.10.3...v0.10.4) (2026-03-06)
 
 
 ### Documentation
 
 * update README.md ([40ee683](https://github.com/NorwegianVeterinaryInstitute/py_maskinporten/commit/40ee683475508387f5e1d99da6fc86a1f6bef2f8))
 
-## [0.10.3](https://github.com/novica/py_maskinporten/compare/py_maskinporten-v0.10.2...py_maskinporten-v0.10.3) (2026-03-06)
+## [0.10.3](https://github.com/novica/py_maskinporten/compare/v0.10.2...v0.10.3) (2026-03-06)
 
 
 ### Documentation
 
 * Update README.md ([a1f8eda](https://github.com/novica/py_maskinporten/commit/a1f8edac704b4dc479d80c1e82712bf6abcf9421))
 
-## [0.10.2](https://github.com/novica/py_maskinporten/compare/py_maskinporten-v0.10.1...py_maskinporten-v0.10.2) (2026-03-06)
+## [0.10.2](https://github.com/novica/py_maskinporten/compare/v0.10.1...v0.10.2) (2026-03-06)
 
 
 ### Bug Fixes
 
 * docker image runs the app ([be6ac59](https://github.com/novica/py_maskinporten/commit/be6ac5970496aa98e47aa03257e0d0edb0474af6))
 
-## [0.10.1](https://github.com/novica/py_maskinporten/compare/py_maskinporten-v0.10.0...py_maskinporten-v0.10.1) (2026-03-06)
+## [0.10.1](https://github.com/novica/py_maskinporten/compare/v0.10.0...v0.10.1) (2026-03-06)
 
 
 ### Documentation
 
 * Add mermaid diagram for token request flow ([52516b6](https://github.com/novica/py_maskinporten/commit/52516b65886ba7689f8c8cc0dcbba305015ed9a5))
 
-## [0.10.0](https://github.com/novica/py_maskinporten/compare/py_maskinporten-v0.9.0...py_maskinporten-v0.10.0) (2026-03-06)
+## [0.10.0](https://github.com/novica/py_maskinporten/compare/v0.9.0...v0.10.0) (2026-03-06)
 
 
 ### Features

@@ -1,6 +1,6 @@
 [project]
 name = "pymaskinporten"
-version = "1.1.4"
+version = "2.0.0"
 description = "Fetch Maskinporten Token"
 readme = "README.md"
 license = "Apache-2.0"

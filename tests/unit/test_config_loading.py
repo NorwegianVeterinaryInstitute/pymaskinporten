@@ -50,7 +50,7 @@ def test_surrounding_whitespace_is_stripped(real_private_key_pem):
     assert cfg.KID == "kid123"
     assert cfg.SCOPE == "scope:a"
     # The stripped PEM key still signs
-    build_jwt(cfg, "https://test.maskinporten.no/token")
+    build_jwt(cfg, "https://test.maskinporten.no/")
 
 
 @pytest.mark.unit

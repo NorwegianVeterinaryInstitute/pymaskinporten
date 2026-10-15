@@ -12,9 +12,11 @@ logger = logging.getLogger(__name__)
 
 ApiEnv = Literal["test", "prod"]
 
+# Maskinporten's issuer identifiers; the JWT `aud` must be one of these, not the
+# token endpoint, which Maskinporten no longer accepts as an audience
 ISSUER_URLS: dict[ApiEnv, str] = {
-    "test": "https://test.maskinporten.no/token",
-    "prod": "https://maskinporten.no/token",
+    "test": "https://test.maskinporten.no/",
+    "prod": "https://maskinporten.no/",
 }
 
 
@@ -28,7 +30,8 @@ def build_jwt(cfg: MaskinportenSecrets, issuer_url: str) -> str:
 
     Args:
         cfg: The configuration object containing necessary credentials.
-        issuer_url (str): The URL of the token issuer.
+        issuer_url (str): Maskinporten's issuer identifier, used as the JWT audience,
+            e.g. "https://test.maskinporten.no/".
 
     Returns:
         str: The encoded JWT assertion.
@@ -75,6 +78,7 @@ def request_maskinporten_token(
     if api_env not in ISSUER_URLS:
         raise ValueError(f"api_env must be 'test' or 'prod', got {api_env!r}")
     issuer_url = ISSUER_URLS[api_env]
+    token_url = issuer_url + "token"
 
     cfg = config if config is not None else load_config()
 
@@ -82,7 +86,7 @@ def request_maskinporten_token(
 
     try:
         response = httpx.post(
-            issuer_url,
+            token_url,
             data={
                 "grant_type": "urn:ietf:params:oauth:grant-type:jwt-bearer",
                 "assertion": jwt_assertion,
@@ -90,7 +94,7 @@ def request_maskinporten_token(
             headers={"Content-Type": "application/x-www-form-urlencoded"},
         )
     except httpx.HTTPError as e:
-        raise MaskinportenTokenError(f"Request to {issuer_url} failed: {e}") from e
+        raise MaskinportenTokenError(f"Request to {token_url} failed: {e}") from e
 
     if response.status_code != 200:
         raise MaskinportenTokenError(f"Error {response.status_code}: {response.text}")
@@ -101,13 +105,13 @@ def request_maskinporten_token(
         expires_in = response_data["expires_in"]
     except (ValueError, KeyError, TypeError) as e:
         raise MaskinportenTokenError(
-            f"Unexpected token response from {issuer_url}"
+            f"Unexpected token response from {token_url}"
         ) from e
 
     if not (
         isinstance(access_token, str) and access_token and isinstance(expires_in, int)
     ):
-        raise MaskinportenTokenError(f"Unexpected token response from {issuer_url}")
+        raise MaskinportenTokenError(f"Unexpected token response from {token_url}")
 
     logger.info("Fetched Maskinporten access token for %s (%s)", cfg.SCOPE, api_env)
     return access_token, expires_in

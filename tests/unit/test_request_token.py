@@ -2,6 +2,7 @@ import logging
 from unittest.mock import patch
 
 import httpx2 as httpx
+import jwt
 import pytest
 
 from pymaskinporten.config import MaskinportenSecrets
@@ -31,16 +32,19 @@ def mocked_post():
 
 @pytest.mark.unit
 @pytest.mark.parametrize(
-    ("api_env", "url"),
+    ("api_env", "issuer"),
     [
-        ("test", "https://test.maskinporten.no/token"),
-        ("prod", "https://maskinporten.no/token"),
+        ("test", "https://test.maskinporten.no/"),
+        ("prod", "https://maskinporten.no/"),
     ],
 )
-def test_api_env_selects_issuer(secrets, mocked_post, api_env, url):
+def test_api_env_selects_issuer(secrets, mocked_post, api_env, issuer):
     request_maskinporten_token(api_env, config=secrets)
 
-    assert mocked_post.call_args.args[0] == url
+    assert mocked_post.call_args.args[0] == issuer + "token"
+    assertion = mocked_post.call_args.kwargs["data"]["assertion"]
+    claims = jwt.decode(assertion, options={"verify_signature": False})
+    assert claims["aud"] == issuer
 
 
 @pytest.mark.unit

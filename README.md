@@ -149,8 +149,10 @@ The demo app below does this for you.
 
 ### Testing against Maskinporten
 
-To check a change against the real test environment, create a Maskinporten integration in
-Samarbeidsportalen (Selvbetjening → Integrasjoner → Ver2), then from the repo root:
+To check a change against the real test environment, create a Maskinporten integration for a
+synthetic organisation (syntetisk organisasjon) in
+[Digdir's test self-service](https://sjolvbetjening.test.samarbeid.digdir.no/), then from the repo
+root:
 
 ```bash
 uv run --extra web python scripts/make_test_key.py   # writes a new .env with a key pair

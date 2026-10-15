@@ -16,5 +16,5 @@ pem = key.private_bytes(
 cfg = MaskinportenSecrets(
     PRIVATE_KEY=pem, MASKINPORTEN_CLIENT_ID="client", KID="kid", SCOPE="scope"
 )
-assert build_jwt(cfg, "https://test.maskinporten.no/token")
+assert build_jwt(cfg, "https://test.maskinporten.no/")
 print("Smoke test passed: public API imported and signed a JWT")

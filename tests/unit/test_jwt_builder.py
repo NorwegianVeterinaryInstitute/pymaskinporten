@@ -3,7 +3,7 @@ import jwt
 from pymaskinporten.config import MaskinportenSecrets
 from pymaskinporten.request_token import build_jwt
 
-TEST_MASKINPORTEN_ISSUER = "https://test.maskinporten.no/token"
+TEST_MASKINPORTEN_ISSUER = "https://test.maskinporten.no/"
 
 
 def test_jwt_contains_expected_claims(real_private_key_pem):

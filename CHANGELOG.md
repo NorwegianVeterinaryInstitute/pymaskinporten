@@ -1,5 +1,51 @@
 # Changelog
 
+## [2.0.0](https://github.com/NorwegianVeterinaryInstitute/pymaskinporten/compare/v1.1.4...v2.0.0) (2026-10-15)
+
+
+### ⚠ BREAKING CHANGES
+
+* the maskinporten-web command is now pymaskinporten-web.
+* maskinporten-web needs pip install pymaskinporten[web]. Install pymaskinporten[web,azure] for the dependencies 1.x installed by default.
+* the Azure Key Vault loader needs pip install pymaskinporten[azure].
+* the placeholder pymaskinporten.main() and the pymaskinporten console script are removed.
+* load_config() no longer calls load_dotenv(). Call it yourself before load_config() if you rely on a .env file.
+* request_maskinporten_token raises ValueError unless api_env is "test" or "prod".
+
+### Features
+
+* add a databricks extra for the Databricks secret loader ([60ced8c](https://github.com/NorwegianVeterinaryInstitute/pymaskinporten/commit/60ced8c1070eb1539c06962278336cd99176c853)), closes [#116](https://github.com/NorwegianVeterinaryInstitute/pymaskinporten/issues/116)
+* add a prefix for credential names in every source ([37d05a2](https://github.com/NorwegianVeterinaryInstitute/pymaskinporten/commit/37d05a24fdcd5d9a9a78d51333ed9a79f5ac58f9)), closes [#122](https://github.com/NorwegianVeterinaryInstitute/pymaskinporten/issues/122)
+* export the public API from the package root ([f4465c8](https://github.com/NorwegianVeterinaryInstitute/pymaskinporten/commit/f4465c87cd03af0551b1dcde17a8b8f5e2a810bc)), closes [#114](https://github.com/NorwegianVeterinaryInstitute/pymaskinporten/issues/114)
+* load credentials from AWS Secrets Manager ([b581974](https://github.com/NorwegianVeterinaryInstitute/pymaskinporten/commit/b581974f1f7bfa017770028c7d9af0979439be7c)), closes [#122](https://github.com/NorwegianVeterinaryInstitute/pymaskinporten/issues/122)
+* load credentials from Google Secret Manager ([b425eda](https://github.com/NorwegianVeterinaryInstitute/pymaskinporten/commit/b425eda8d6b9a4d12ed0af88023bd8840ff6b347)), closes [#122](https://github.com/NorwegianVeterinaryInstitute/pymaskinporten/issues/122)
+* move Flask and python-dotenv to an optional web extra ([8849cc3](https://github.com/NorwegianVeterinaryInstitute/pymaskinporten/commit/8849cc3badd52c151c2d003334c8d3d988f8b454)), closes [#116](https://github.com/NorwegianVeterinaryInstitute/pymaskinporten/issues/116)
+* move the Azure SDK to an optional azure extra ([3ed9396](https://github.com/NorwegianVeterinaryInstitute/pymaskinporten/commit/3ed9396dd7d5b907e2aaa6618fde8d5df11cc7d5)), closes [#116](https://github.com/NorwegianVeterinaryInstitute/pymaskinporten/issues/116)
+* rename the demo command to pymaskinporten-web ([26a5c37](https://github.com/NorwegianVeterinaryInstitute/pymaskinporten/commit/26a5c3707e67fc7634a29403475320daeb20a04c)), closes [#116](https://github.com/NorwegianVeterinaryInstitute/pymaskinporten/issues/116)
+* stop loading .env files inside load_config ([61c0039](https://github.com/NorwegianVeterinaryInstitute/pymaskinporten/commit/61c003998e75ea6c187edfb2616752b06a9bf269)), closes [#114](https://github.com/NorwegianVeterinaryInstitute/pymaskinporten/issues/114)
+* validate api_env and accept credentials through config= ([8500e12](https://github.com/NorwegianVeterinaryInstitute/pymaskinporten/commit/8500e12488f9ef6b64cbc92cb33665e279d4ff2f)), closes [#114](https://github.com/NorwegianVeterinaryInstitute/pymaskinporten/issues/114)
+
+
+### Bug Fixes
+
+* make the Databricks secret loader work and use dashed secret names ([fc62c1e](https://github.com/NorwegianVeterinaryInstitute/pymaskinporten/commit/fc62c1ee16fc506f4a890e9f6ab45a25b950544b)), closes [#115](https://github.com/NorwegianVeterinaryInstitute/pymaskinporten/issues/115)
+* raise MaskinportenTokenError for network errors and bad token responses ([74ba584](https://github.com/NorwegianVeterinaryInstitute/pymaskinporten/commit/74ba5843f78baae627d68321fc755b194c2ade66)), closes [#114](https://github.com/NorwegianVeterinaryInstitute/pymaskinporten/issues/114)
+* reject blank credential fields and strip surrounding whitespace ([8a9d76f](https://github.com/NorwegianVeterinaryInstitute/pymaskinporten/commit/8a9d76f943936ceb6b5b25c378c962af08165c80)), closes [#114](https://github.com/NorwegianVeterinaryInstitute/pymaskinporten/issues/114)
+* show invalid demo config on the page instead of a 500 ([74df35c](https://github.com/NorwegianVeterinaryInstitute/pymaskinporten/commit/74df35ce59a572207af5c73f4cc3648324c39c01)), closes [#114](https://github.com/NorwegianVeterinaryInstitute/pymaskinporten/issues/114)
+* use valid Key Vault secret names and report missing secrets ([5e7bcbb](https://github.com/NorwegianVeterinaryInstitute/pymaskinporten/commit/5e7bcbb09f64f245d9e6eada37af835a9bbcc8f9)), closes [#115](https://github.com/NorwegianVeterinaryInstitute/pymaskinporten/issues/115)
+* wrap Databricks setup errors outside Databricks in RuntimeError ([ab3770b](https://github.com/NorwegianVeterinaryInstitute/pymaskinporten/commit/ab3770b624b6fcba8a8ae901d457fbb2011f6500)), closes [#116](https://github.com/NorwegianVeterinaryInstitute/pymaskinporten/issues/116)
+* wrap Key Vault access failures in RuntimeError ([1516183](https://github.com/NorwegianVeterinaryInstitute/pymaskinporten/commit/15161831f07974f0cefa6572ffd9581b88acc48c)), closes [#115](https://github.com/NorwegianVeterinaryInstitute/pymaskinporten/issues/115)
+
+
+### Documentation
+
+* document config=, root imports and .env loading ([2765dd0](https://github.com/NorwegianVeterinaryInstitute/pymaskinporten/commit/2765dd0fef37f22549e671e68ad02e7b50b65722)), closes [#114](https://github.com/NorwegianVeterinaryInstitute/pymaskinporten/issues/114)
+* document installing the extras ([eb9bd70](https://github.com/NorwegianVeterinaryInstitute/pymaskinporten/commit/eb9bd7023c37f5e928ba860a42f9ba0ab96058b9)), closes [#116](https://github.com/NorwegianVeterinaryInstitute/pymaskinporten/issues/116)
+* document the AWS and Google loaders and name prefixes ([4a47532](https://github.com/NorwegianVeterinaryInstitute/pymaskinporten/commit/4a475326f323d8177e9afa1b157fd18810a3a766)), closes [#122](https://github.com/NorwegianVeterinaryInstitute/pymaskinporten/issues/122)
+* document the Key Vault and Databricks secret loaders ([34f3cd7](https://github.com/NorwegianVeterinaryInstitute/pymaskinporten/commit/34f3cd706144dac675ecd446c8aab970e6d04064)), closes [#115](https://github.com/NorwegianVeterinaryInstitute/pymaskinporten/issues/115)
+* put prefix example comments on their own lines ([5805cb9](https://github.com/NorwegianVeterinaryInstitute/pymaskinporten/commit/5805cb94fecd620439d70a5de2fae8335fb6cbe8))
+* say the secret-store loaders are untested against real services ([ab60b5f](https://github.com/NorwegianVeterinaryInstitute/pymaskinporten/commit/ab60b5f5b4003c7bd7ab8a5081ec74ec3964c7c2)), closes [#116](https://github.com/NorwegianVeterinaryInstitute/pymaskinporten/issues/116)
+
 ## [1.1.4](https://github.com/NorwegianVeterinaryInstitute/pymaskinporten/compare/v1.1.3...v1.1.4) (2026-10-14)
 
 

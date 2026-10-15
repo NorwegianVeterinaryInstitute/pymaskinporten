@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.0.1](https://github.com/NorwegianVeterinaryInstitute/pymaskinporten/compare/v2.0.0...v2.0.1) (2026-10-15)
+
+
+### Bug Fixes
+
+* use the Maskinporten issuer as the JWT audience ([#130](https://github.com/NorwegianVeterinaryInstitute/pymaskinporten/issues/130)) ([7b40129](https://github.com/NorwegianVeterinaryInstitute/pymaskinporten/commit/7b401293a493fee4c953268f14f9186fb79e6951))
+
 ## [2.0.0](https://github.com/NorwegianVeterinaryInstitute/pymaskinporten/compare/v1.1.4...v2.0.0) (2026-10-15)
 
 

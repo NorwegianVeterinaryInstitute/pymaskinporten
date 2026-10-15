@@ -5,3 +5,8 @@ Dockerfile
 __pycache__/
 *.pyc
 *.pyo
+# keep credentials and repo metadata out of the build context
+.env
+.secrets/
+.git/
+.codegraph/

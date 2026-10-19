@@ -91,6 +91,12 @@ reference:
 #   toc-depth: 2               # TOC heading depth (default: 2)
 #   toc-title: On this page    # TOC title (default: "On this page")
 
+# Extra <head> Content
+# --------------------
+# Google Search Console ownership check for the GitHub Pages site
+include_in_header:
+  - <meta name="google-site-verification" content="xP9MHkJwjVeEQGD5ro183O1uEIqjMg9zsEXjgWjWNv0" />
+
 # Jupyter Kernel
 # --------------
 # Jupyter kernel to use for executing code cells in .qmd files.

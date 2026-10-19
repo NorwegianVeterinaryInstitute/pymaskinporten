@@ -58,7 +58,7 @@ gcp = [
     "google-cloud-secret-manager>=2.16",
 ]
 databricks = [
-    "databricks-sdk>=0.20",
+    "databricks-sdk>=0.153.0",
 ]
 
 [dependency-groups]

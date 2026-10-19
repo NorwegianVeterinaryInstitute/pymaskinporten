@@ -64,7 +64,7 @@ databricks = [
 [dependency-groups]
 dev = [
   "pytest>=9.0.0",
-  "ruff>=0.6.1",
+  "ruff>=0.17.1",
   "ty>=0.0.21",
 ]
 

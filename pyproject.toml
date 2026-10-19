@@ -52,7 +52,7 @@ azure = [
     "azure-keyvault-secrets>=4.10.0",
 ]
 aws = [
-    "boto3>=1.26",
+    "boto3>=1.43.114",
 ]
 gcp = [
     "google-cloud-secret-manager>=2.16",

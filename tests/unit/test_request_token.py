@@ -78,6 +78,34 @@ def test_non_200_raises_token_error(secrets, mocked_post):
 
 
 @pytest.mark.unit
+@pytest.mark.parametrize(
+    ("text", "code", "description"),
+    [
+        (
+            '{"error":"invalid_scope","error_description":"Scope not allowed"}',
+            "invalid_scope",
+            "Scope not allowed",
+        ),
+        ('{"error":"invalid_client"}', "invalid_client", None),
+        ('{"error":42,"error_description":["x"]}', None, None),
+        ('["not", "an", "object"]', None, None),
+        ("Bad Gateway\n", None, "Bad Gateway"),
+        ("", None, None),
+    ],
+)
+def test_non_200_error_fields(secrets, mocked_post, text, code, description):
+    mocked_post.return_value.status_code = 400
+    mocked_post.return_value.text = text
+
+    with pytest.raises(MaskinportenTokenError) as excinfo:
+        request_maskinporten_token("test", config=secrets)
+
+    error = excinfo.value
+    assert (error.status, error.code, error.description) == (400, code, description)
+    assert str(error) == f"Error 400: {text}"
+
+
+@pytest.mark.unit
 def test_network_error_raises_token_error(secrets, mocked_post):
     mocked_post.side_effect = httpx.ConnectError("connection refused")
 
@@ -85,6 +113,8 @@ def test_network_error_raises_token_error(secrets, mocked_post):
         request_maskinporten_token("test", config=secrets)
 
     assert isinstance(excinfo.value.__cause__, httpx.ConnectError)
+    error = excinfo.value
+    assert (error.status, error.code, error.description) == (None, None, None)
 
 
 @pytest.mark.unit
@@ -104,8 +134,10 @@ def test_network_error_raises_token_error(secrets, mocked_post):
 def test_200_without_token_fields_raises_token_error(secrets, mocked_post, body):
     mocked_post.return_value.json.return_value = body
 
-    with pytest.raises(MaskinportenTokenError, match="Unexpected token response"):
+    with pytest.raises(MaskinportenTokenError, match="Unexpected token response") as e:
         request_maskinporten_token("test", config=secrets)
+
+    assert e.value.status == 200
 
 
 @pytest.mark.unit

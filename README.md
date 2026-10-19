@@ -54,7 +54,17 @@ access_token, expires_in = request_maskinporten_token("test")  # or "prod"
 ```
 
 `api_env` must be `"test"` or `"prod"`; anything else raises `ValueError`. A failed token request
-raises `MaskinportenTokenError`.
+raises `MaskinportenTokenError`, with Maskinporten's HTTP `status`, OAuth error `code` (e.g.
+`invalid_scope`) and `description` as attributes when there was a response:
+
+```python
+from pymaskinporten import MaskinportenTokenError
+
+try:
+    access_token, expires_in = request_maskinporten_token("test")
+except MaskinportenTokenError as e:
+    print(e.status, e.code, e.description)
+```
 
 ### Secret stores
 

@@ -1,3 +1,4 @@
+import json
 import logging
 import uuid
 from datetime import UTC, datetime, timedelta
@@ -21,7 +22,51 @@ ISSUER_URLS: dict[ApiEnv, str] = {
 
 
 class MaskinportenTokenError(Exception):
-    """Raised when Maskinporten rejects a token request."""
+    """
+    Raised when Maskinporten rejects a token request.
+
+    Attributes:
+        status: The HTTP status code, or None if no response was received.
+        code: The OAuth `error` code, e.g. "invalid_scope", if Maskinporten sent one.
+        description: The OAuth `error_description`, or the raw response body when it
+            isn't an OAuth error, if there was one.
+    """
+
+    def __init__(
+        self,
+        message: str,
+        *,
+        status: int | None = None,
+        code: str | None = None,
+        description: str | None = None,
+    ) -> None:
+        super().__init__(message)
+        self.status = status
+        self.code = code
+        self.description = description
+
+
+def _error_from_response(response: httpx.Response) -> MaskinportenTokenError:
+    """Build the error for a failed token response from its OAuth error body."""
+    text = response.text
+    code = description = None
+    try:
+        body = json.loads(text)
+    except ValueError:
+        body = None
+        description = text.strip() or None
+    # Maskinporten sends OAuth error bodies (RFC 6749, section 5.2)
+    if isinstance(body, dict):
+        if isinstance(body.get("error"), str):
+            code = body["error"]
+        if isinstance(body.get("error_description"), str):
+            description = body["error_description"]
+    return MaskinportenTokenError(
+        f"Error {response.status_code}: {text}",
+        status=response.status_code,
+        code=code,
+        description=description,
+    )
 
 
 def build_jwt(cfg: MaskinportenSecrets, issuer_url: str) -> str:
@@ -97,7 +142,7 @@ def request_maskinporten_token(
         raise MaskinportenTokenError(f"Request to {token_url} failed: {e}") from e
 
     if response.status_code != 200:
-        raise MaskinportenTokenError(f"Error {response.status_code}: {response.text}")
+        raise _error_from_response(response)
 
     try:
         response_data = response.json()
@@ -105,13 +150,17 @@ def request_maskinporten_token(
         expires_in = response_data["expires_in"]
     except (ValueError, KeyError, TypeError) as e:
         raise MaskinportenTokenError(
-            f"Unexpected token response from {token_url}"
+            f"Unexpected token response from {token_url}",
+            status=response.status_code,
         ) from e
 
     if not (
         isinstance(access_token, str) and access_token and isinstance(expires_in, int)
     ):
-        raise MaskinportenTokenError(f"Unexpected token response from {token_url}")
+        raise MaskinportenTokenError(
+            f"Unexpected token response from {token_url}",
+            status=response.status_code,
+        )
 
     logger.info("Fetched Maskinporten access token for %s (%s)", cfg.SCOPE, api_env)
     return access_token, expires_in

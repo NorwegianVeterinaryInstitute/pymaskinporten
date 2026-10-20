@@ -3,7 +3,7 @@ message: 'If you wish to cite the "pymaskinporten" package use:'
 type: software
 license: Apache-2.0
 title: 'pymaskinporten: a python library for fetching Maskinporten tokens'
-version: 2.0.1
+version: 2.1.0
 abstract: >-
   pymaskinporten is a Python library that simplifies the process of obtaining
   Maskinporten tokens for secure API access. It provides an easy-to-use
@@ -20,4 +20,4 @@ contact:
     given-names: Novica
     email: nnovica@gmail.com
     orcid: "https://orcid.org/0009-0005-7773-7718"
-date-released: "2026-10-15"
+date-released: "2026-10-20"

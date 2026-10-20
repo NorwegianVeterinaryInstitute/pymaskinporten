@@ -1,6 +1,6 @@
 [project]
 name = "pymaskinporten"
-version = "2.0.1"
+version = "2.1.0"
 description = "Python client for Maskinporten, Norway's machine-to-machine OAuth2 (JWT bearer) token service"
 readme = "README.md"
 license = "Apache-2.0"

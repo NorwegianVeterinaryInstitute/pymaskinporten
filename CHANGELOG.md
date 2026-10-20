@@ -1,5 +1,25 @@
 # Changelog
 
+## [2.1.0](https://github.com/NorwegianVeterinaryInstitute/pymaskinporten/compare/v2.0.1...v2.1.0) (2026-10-20)
+
+
+### Features
+
+* add MaskinportenClient with token caching ([#149](https://github.com/NorwegianVeterinaryInstitute/pymaskinporten/issues/149)) ([4f860af](https://github.com/NorwegianVeterinaryInstitute/pymaskinporten/commit/4f860afd4926e553ce162e4acb5a76e26b51ae30))
+* add pymaskinporten doctor command ([#150](https://github.com/NorwegianVeterinaryInstitute/pymaskinporten/issues/150)) ([61569a6](https://github.com/NorwegianVeterinaryInstitute/pymaskinporten/commit/61569a630ab4a0f88d9c6a37a43daa787ada647e))
+* add status, code and description to errors ([#141](https://github.com/NorwegianVeterinaryInstitute/pymaskinporten/issues/141)) ([3348950](https://github.com/NorwegianVeterinaryInstitute/pymaskinporten/commit/3348950e8674c49c0c4f9124424bbd888d65d123))
+* allow overriding token endpoint and audience ([#148](https://github.com/NorwegianVeterinaryInstitute/pymaskinporten/issues/148)) ([4626979](https://github.com/NorwegianVeterinaryInstitute/pymaskinporten/commit/46269798621ccf40a4bef4a32b7bbe4ec4b7ea46))
+
+
+### Bug Fixes
+
+* report bad private keys in doctor ([#151](https://github.com/NorwegianVeterinaryInstitute/pymaskinporten/issues/151)) ([0237629](https://github.com/NorwegianVeterinaryInstitute/pymaskinporten/commit/0237629c571980caf39a069938ef405b6ed556f9))
+
+
+### Documentation
+
+* improve package discoverability ([#135](https://github.com/NorwegianVeterinaryInstitute/pymaskinporten/issues/135)) ([b4b0441](https://github.com/NorwegianVeterinaryInstitute/pymaskinporten/commit/b4b0441fd1e67293faca5447e12ab12aeca5c57a))
+
 ## [2.0.1](https://github.com/NorwegianVeterinaryInstitute/pymaskinporten/compare/v2.0.0...v2.0.1) (2026-10-15)
 
 

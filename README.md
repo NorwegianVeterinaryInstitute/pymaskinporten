@@ -1,7 +1,7 @@
 # pymaskinporten
 
 Python client for [Maskinporten](https://samarbeid.digdir.no/maskinporten/dette-er-maskinporten/96),
-Norway's machine-to-machine OAuth2 token service from Digdir.
+Digdir's machine-to-machine OAuth2 token service for Norwegian businesses that exchange data.
 
 <!-- badges start-->
 [![PyPI version](https://img.shields.io/pypi/v/pymaskinporten.svg)](https://pypi.org/project/pymaskinporten/)
@@ -10,9 +10,6 @@ Norway's machine-to-machine OAuth2 token service from Digdir.
 [![Documentation](https://img.shields.io/badge/docs-GitHub%20Pages-blue)](https://norwegianveterinaryinstitute.github.io/pymaskinporten/)
 [![License](https://img.shields.io/badge/license-Apache%20License%202.0-blue)](https://opensource.org/license/apache-2.0)
 <!-- badges end-->
-
-This is a python package to request a token from [Maskinporten](https://samarbeid.digdir.no/maskinporten/dette-er-maskinporten/96) - the Norwegian 
-national access control solution for businesses that exchange data.
 
 ```mermaid
 graph LR
@@ -183,6 +180,9 @@ access_token, expires_in = request_maskinporten_token(
     audience="http://localhost:6969/",
 )
 ```
+
+Always override `audience` together with `token_url`. With `token_url` alone, the JWT is still
+made out to the real Maskinporten, and the other server could use it there for up to a minute.
 
 ### Checking a setup
 

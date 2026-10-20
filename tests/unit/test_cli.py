@@ -2,6 +2,8 @@ from unittest.mock import patch
 
 import httpx2 as httpx
 import pytest
+from cryptography.hazmat.primitives import serialization
+from cryptography.hazmat.primitives.asymmetric import ec, ed25519
 
 from pymaskinporten.cli import main
 from pymaskinporten.config import MaskinportenSecrets
@@ -106,6 +108,10 @@ def test_options_are_passed_through(secrets, loaded, mocked_request):
             "rejected the request",
         ),
         (MaskinportenTokenError("Request failed"), "No response from Maskinporten"),
+        (
+            MaskinportenTokenError("Unexpected token response", status=200),
+            "Got a response, but no token",
+        ),
     ],
 )
 def test_failure_prints_hint_and_checklist(loaded, mocked_request, capsys, error, hint):
@@ -139,6 +145,86 @@ def test_missing_credentials_are_reported(mocked_request, capsys):
         assert main(["doctor"]) == 1
 
     assert "Could not load credentials: Missing required" in capsys.readouterr().out
+    mocked_request.assert_not_called()
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize(
+    "key",
+    [
+        "TOP-SECRET-KEY",
+        # A PEM from an env var with literal \n instead of line breaks
+        "-----BEGIN PRIVATE KEY-----\\nTOPSECRET\\n-----END PRIVATE KEY-----",
+    ],
+)
+def test_unparsable_key_is_reported_without_value(
+    monkeypatch, mocked_request, capsys, key
+):
+    # Strict validation is off by default, so load_config accepts any key
+    monkeypatch.setenv("PRIVATE_KEY", key)
+    monkeypatch.setenv("MASKINPORTEN_CLIENT_ID", "client-id")
+    monkeypatch.setenv("KID", "kid123")
+    monkeypatch.setenv("SCOPE", "scope:a")
+
+    assert main(["doctor"]) == 1
+
+    out = capsys.readouterr().out
+    assert "Invalid private key:" in out
+    assert "literal \\n" in out
+    assert "TOPSECRET" not in out and "TOP-SECRET-KEY" not in out
+    mocked_request.assert_not_called()
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize(
+    ("key", "name"),
+    [
+        (ec.generate_private_key(ec.SECP256R1()), "ECPrivateKey"),
+        (ed25519.Ed25519PrivateKey.generate(), "Ed25519PrivateKey"),
+    ],
+)
+def test_non_rsa_key_is_reported(monkeypatch, mocked_request, capsys, key, name):
+    pem = key.private_bytes(
+        serialization.Encoding.PEM,
+        serialization.PrivateFormat.PKCS8,
+        serialization.NoEncryption(),
+    ).decode()
+    monkeypatch.setenv("PRIVATE_KEY", pem)
+    monkeypatch.setenv("MASKINPORTEN_CLIENT_ID", "client-id")
+    monkeypatch.setenv("KID", "kid123")
+    monkeypatch.setenv("SCOPE", "scope:a")
+
+    assert main(["doctor"]) == 1
+
+    out = capsys.readouterr().out
+    assert f"got {name}" in out
+    assert "must be an RSA private key" in out
+    mocked_request.assert_not_called()
+
+
+@pytest.mark.unit
+def test_public_key_is_reported_as_invalid(
+    monkeypatch, mocked_request, capsys, real_private_key_pem
+):
+    private = serialization.load_pem_private_key(
+        real_private_key_pem.encode(), password=None
+    )
+    public_pem = (
+        private.public_key()
+        .public_bytes(
+            serialization.Encoding.PEM,
+            serialization.PublicFormat.SubjectPublicKeyInfo,
+        )
+        .decode()
+    )
+    monkeypatch.setenv("PRIVATE_KEY", public_pem)
+    monkeypatch.setenv("MASKINPORTEN_CLIENT_ID", "client-id")
+    monkeypatch.setenv("KID", "kid123")
+    monkeypatch.setenv("SCOPE", "scope:a")
+
+    assert main(["doctor"]) == 1
+
+    assert "Invalid private key:" in capsys.readouterr().out
     mocked_request.assert_not_called()
 
 

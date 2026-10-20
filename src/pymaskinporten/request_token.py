@@ -54,13 +54,15 @@ def _error_from_response(response: httpx.Response) -> MaskinportenTokenError:
         body = json.loads(text)
     except ValueError:
         body = None
-        description = text.strip() or None
     # Maskinporten sends OAuth error bodies (RFC 6749, section 5.2)
     if isinstance(body, dict):
         if isinstance(body.get("error"), str):
             code = body["error"]
         if isinstance(body.get("error_description"), str):
             description = body["error_description"]
+    if code is None and description is None:
+        # Not an OAuth error, e.g. from a gateway: keep the body as the description
+        description = text.strip() or None
     return MaskinportenTokenError(
         f"Error {response.status_code}: {text}",
         status=response.status_code,
@@ -112,7 +114,9 @@ def request_maskinporten_token(
         api_env: The Maskinporten environment, "test" or "prod".
         config: The credentials to use. If None, they are read with `load_config()`.
         token_url: The token endpoint to call, e.g. a local mock. Defaults to the
-            `api_env` endpoint, e.g. "https://test.maskinporten.no/token".
+            `api_env` endpoint, e.g. "https://test.maskinporten.no/token". When
+            calling a server other than Maskinporten, set `audience` too: otherwise
+            that server receives an assertion it could use with Maskinporten.
         audience: The JWT audience. Defaults to the `api_env` issuer, e.g.
             "https://test.maskinporten.no/".
 
@@ -151,7 +155,9 @@ def request_maskinporten_token(
 
     access_token, expires_in = _parse_token_response(response, token_url)
 
-    logger.info("Fetched Maskinporten access token for %s (%s)", cfg.SCOPE, api_env)
+    logger.info(
+        "Fetched Maskinporten access token for %s from %s", cfg.SCOPE, token_url
+    )
     return access_token, expires_in
 
 

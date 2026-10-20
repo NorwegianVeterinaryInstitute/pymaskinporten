@@ -74,6 +74,8 @@ docs = [
 ]
 
 [build-system]
+# Dependabot updates only uv.lock, which doesn't include the build backend:
+# raise this bound by hand when a new uv minor version is out
 requires = ["uv_build>=0.13.1,<0.14"]
 build-backend = "uv_build"
 

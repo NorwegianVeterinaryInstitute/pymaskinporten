@@ -131,12 +131,7 @@ def request_maskinporten_token(
         )
     """
 
-    if api_env not in ISSUER_URLS:
-        raise ValueError(f"api_env must be 'test' or 'prod', got {api_env!r}")
-    if audience is None:
-        audience = ISSUER_URLS[api_env]
-    if token_url is None:
-        token_url = ISSUER_URLS[api_env] + "token"
+    token_url, audience = _resolve_endpoints(api_env, token_url, audience)
 
     cfg = config if config is not None else load_config()
 
@@ -154,6 +149,27 @@ def request_maskinporten_token(
     except httpx.HTTPError as e:
         raise MaskinportenTokenError(f"Request to {token_url} failed: {e}") from e
 
+    access_token, expires_in = _parse_token_response(response, token_url)
+
+    logger.info("Fetched Maskinporten access token for %s (%s)", cfg.SCOPE, api_env)
+    return access_token, expires_in
+
+
+def _resolve_endpoints(
+    api_env: ApiEnv, token_url: str | None, audience: str | None
+) -> tuple[str, str]:
+    """Return the token URL and JWT audience, defaulting to those of `api_env`."""
+    if api_env not in ISSUER_URLS:
+        raise ValueError(f"api_env must be 'test' or 'prod', got {api_env!r}")
+    if audience is None:
+        audience = ISSUER_URLS[api_env]
+    if token_url is None:
+        token_url = ISSUER_URLS[api_env] + "token"
+    return token_url, audience
+
+
+def _parse_token_response(response: httpx.Response, token_url: str) -> tuple[str, int]:
+    """Return the access token and its lifetime, or raise for a failed response."""
     if response.status_code != 200:
         raise _error_from_response(response)
 
@@ -175,5 +191,4 @@ def request_maskinporten_token(
             status=response.status_code,
         )
 
-    logger.info("Fetched Maskinporten access token for %s (%s)", cfg.SCOPE, api_env)
     return access_token, expires_in

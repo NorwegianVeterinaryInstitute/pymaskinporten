@@ -74,6 +74,7 @@ reference:
   - title: Tokens
     desc: Request a Maskinporten access token
     contents:
+      - client.MaskinportenClient
       - request_token.request_maskinporten_token
       - request_token.build_jwt
       - request_token.MaskinportenTokenError

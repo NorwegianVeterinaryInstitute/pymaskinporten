@@ -154,6 +154,24 @@ load_dotenv()
 
 The demo app below does this for you.
 
+### Reusing tokens
+
+`request_maskinporten_token` fetches a new token on every call. To reuse a token until shortly
+before it expires, keep a `MaskinportenClient` around and call `get_token()` whenever you need one:
+
+```python
+from pymaskinporten import MaskinportenClient
+
+client = MaskinportenClient(api_env="prod")  # reads the config once with load_config()
+
+headers = {"Authorization": f"Bearer {client.get_token()}"}
+```
+
+It fetches a new token `refresh_margin` seconds (default 10) before the old one expires. It is
+thread-safe: concurrent callers share one request. In async code, call it with
+`await asyncio.to_thread(client.get_token)`. It takes the same `token_url` and `audience`
+overrides as `request_maskinporten_token`.
+
 ### Other endpoints
 
 `api_env` picks the token endpoint and the JWT audience. To call another server, such as a local

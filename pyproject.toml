@@ -64,7 +64,7 @@ databricks = [
 [dependency-groups]
 dev = [
   "pytest>=9.0.0",
-  "ruff>=0.6.1",
+  "ruff>=0.17.1",
   "ty>=0.0.21",
 ]
 
@@ -73,7 +73,7 @@ docs = [
 ]
 
 [build-system]
-requires = ["uv_build>=0.9.0"]
+requires = ["uv_build>=0.13.1,<0.14"]
 build-backend = "uv_build"
 
 [tool.uv.build-backend]

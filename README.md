@@ -154,6 +154,18 @@ load_dotenv()
 
 The demo app below does this for you.
 
+### Other endpoints
+
+`api_env` picks the token endpoint and the JWT audience. To call another server, such as a local
+mock, override them:
+
+```python
+access_token, expires_in = request_maskinporten_token(
+    token_url="http://localhost:6969/token",
+    audience="http://localhost:6969/",
+)
+```
+
 ### Testing against Maskinporten
 
 To check a change against the real test environment, create a Maskinporten integration for a

@@ -48,6 +48,39 @@ def test_api_env_selects_issuer(secrets, mocked_post, api_env, issuer):
 
 
 @pytest.mark.unit
+@pytest.mark.parametrize(
+    ("overrides", "url", "aud"),
+    [
+        (
+            {"token_url": "http://localhost:6969/token"},
+            "http://localhost:6969/token",
+            "https://test.maskinporten.no/",
+        ),
+        (
+            {"audience": "http://localhost:6969/"},
+            "https://test.maskinporten.no/token",
+            "http://localhost:6969/",
+        ),
+        (
+            {
+                "token_url": "http://localhost:6969/token",
+                "audience": "http://localhost:6969/",
+            },
+            "http://localhost:6969/token",
+            "http://localhost:6969/",
+        ),
+    ],
+)
+def test_overrides_replace_env_defaults(secrets, mocked_post, overrides, url, aud):
+    request_maskinporten_token("test", config=secrets, **overrides)
+
+    assert mocked_post.call_args.args[0] == url
+    assertion = mocked_post.call_args.kwargs["data"]["assertion"]
+    claims = jwt.decode(assertion, options={"verify_signature": False})
+    assert claims["aud"] == aud
+
+
+@pytest.mark.unit
 @pytest.mark.parametrize("api_env", ["production", "Test", ""])
 def test_invalid_api_env_raises(secrets, mocked_post, api_env):
     with pytest.raises(ValueError, match="api_env"):

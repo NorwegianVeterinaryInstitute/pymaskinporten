@@ -3,6 +3,9 @@
 import argparse
 import sys
 
+from cryptography.exceptions import UnsupportedAlgorithm
+from cryptography.hazmat.primitives.asymmetric.rsa import RSAPrivateKey
+from cryptography.hazmat.primitives.serialization import load_pem_private_key
 from pydantic import ValidationError
 
 from pymaskinporten.config import load_config
@@ -30,6 +33,11 @@ def _hint(error: MaskinportenTokenError) -> str:
         return (
             "No response from Maskinporten: check the token URL, network access and "
             "any proxy."
+        )
+    if error.code is None and 200 <= error.status < 300:
+        return (
+            "Got a response, but no token: is the token URL a Maskinporten token "
+            "endpoint?"
         )
     if "auth-00004" in text:
         return "AUTH-00004 is a catch-all error: work through the checklist below."
@@ -74,6 +82,24 @@ def _doctor(args: argparse.Namespace) -> int:
         return 1
     except (ValueError, RuntimeError) as e:
         print(f"Could not load credentials: {e}")
+        return 1
+
+    # Signing needs a parsable RSA key, and load_config only checks it with
+    # STRICT_KEY_VALIDATION; the error never includes the key itself
+    try:
+        key = load_pem_private_key(config.PRIVATE_KEY.encode(), password=None)
+    except (ValueError, TypeError, UnsupportedAlgorithm) as e:
+        print(f"Invalid private key: {e}")
+        print(
+            "PRIVATE_KEY must be an unencrypted PEM private key: check that it has its "
+            "BEGIN/END lines and real line breaks, not literal \\n."
+        )
+        return 1
+    if not isinstance(key, RSAPrivateKey):
+        print(
+            f"Invalid private key: got {type(key).__name__}, but "
+            "PRIVATE_KEY must be an RSA private key (Maskinporten uses RS256)."
+        )
         return 1
 
     print(f"Environment: {args.env}")

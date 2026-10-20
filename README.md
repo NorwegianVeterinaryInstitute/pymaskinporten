@@ -184,6 +184,18 @@ access_token, expires_in = request_maskinporten_token(
 )
 ```
 
+### Checking a setup
+
+`pymaskinporten doctor` requests a token with your credentials and, if Maskinporten refuses,
+explains the likely cause (wrong scope, unregistered key, rejected JWT, network) with a checklist.
+It never prints the private key or the token.
+
+```bash
+pymaskinporten doctor                    # test environment, credentials from environment variables
+pymaskinporten doctor --env prod --deployment azure --key-vault-uri https://my-vault.vault.azure.net/
+pymaskinporten doctor --help             # all options, the same as load_config()
+```
+
 ### Testing against Maskinporten
 
 To check a change against the real test environment, create a Maskinporten integration for a

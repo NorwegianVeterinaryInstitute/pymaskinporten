@@ -99,7 +99,11 @@ def build_jwt(cfg: MaskinportenSecrets, issuer_url: str) -> str:
 
 
 def request_maskinporten_token(
-    api_env: ApiEnv = "test", config: MaskinportenSecrets | None = None
+    api_env: ApiEnv = "test",
+    config: MaskinportenSecrets | None = None,
+    *,
+    token_url: str | None = None,
+    audience: str | None = None,
 ) -> tuple[str, int]:
     """
     Requests an access token from Maskinporten.
@@ -107,6 +111,10 @@ def request_maskinporten_token(
     Args:
         api_env: The Maskinporten environment, "test" or "prod".
         config: The credentials to use. If None, they are read with `load_config()`.
+        token_url: The token endpoint to call, e.g. a local mock. Defaults to the
+            `api_env` endpoint, e.g. "https://test.maskinporten.no/token".
+        audience: The JWT audience. Defaults to the `api_env` issuer, e.g.
+            "https://test.maskinporten.no/".
 
     Returns:
         tuple: The access token (str) and its lifetime in seconds (int).
@@ -118,16 +126,21 @@ def request_maskinporten_token(
     Examples:
         request_maskinporten_token("test")
         request_maskinporten_token("prod", config=load_config("azure", key_vault_uri=uri))
+        request_maskinporten_token(
+            token_url="http://localhost:6969/token", audience="http://localhost:6969/"
+        )
     """
 
     if api_env not in ISSUER_URLS:
         raise ValueError(f"api_env must be 'test' or 'prod', got {api_env!r}")
-    issuer_url = ISSUER_URLS[api_env]
-    token_url = issuer_url + "token"
+    if audience is None:
+        audience = ISSUER_URLS[api_env]
+    if token_url is None:
+        token_url = ISSUER_URLS[api_env] + "token"
 
     cfg = config if config is not None else load_config()
 
-    jwt_assertion = build_jwt(cfg, issuer_url)
+    jwt_assertion = build_jwt(cfg, audience)
 
     try:
         response = httpx.post(

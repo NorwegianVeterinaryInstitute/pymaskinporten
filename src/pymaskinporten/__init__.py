@@ -7,6 +7,7 @@ Provides a set of functions to fetch a token from Maskinporten
    :start-line: 15
 """
 
+from pymaskinporten.client import MaskinportenClient
 from pymaskinporten.config import MaskinportenSecrets, load_config
 from pymaskinporten.request_token import (
     MaskinportenTokenError,
@@ -15,6 +16,7 @@ from pymaskinporten.request_token import (
 )
 
 __all__ = [
+    "MaskinportenClient",
     "MaskinportenSecrets",
     "MaskinportenTokenError",
     "build_jwt",

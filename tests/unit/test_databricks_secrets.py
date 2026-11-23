@@ -33,7 +33,7 @@ def dbutils(monkeypatch, fake_pem):
         }
     )
     runtime = ModuleType("databricks.sdk.runtime")
-    runtime.dbutils = SimpleNamespace(secrets=secrets)  # ty: ignore[unresolved-attribute]
+    runtime.dbutils = SimpleNamespace(secrets=secrets)  # ty: ignore[missing-attribute]
     monkeypatch.setitem(sys.modules, "databricks", ModuleType("databricks"))
     monkeypatch.setitem(sys.modules, "databricks.sdk", ModuleType("databricks.sdk"))
     monkeypatch.setitem(sys.modules, "databricks.sdk.runtime", runtime)

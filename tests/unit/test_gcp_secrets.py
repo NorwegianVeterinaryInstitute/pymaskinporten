@@ -30,11 +30,11 @@ class FakeSecretManagerClient:
 
 def install_fake_sdk(monkeypatch, make_client):
     secretmanager = ModuleType("google.cloud.secretmanager")
-    secretmanager.SecretManagerServiceClient = make_client  # ty: ignore[unresolved-attribute]
+    secretmanager.SecretManagerServiceClient = make_client  # ty: ignore[missing-attribute]
     cloud = ModuleType("google.cloud")
-    cloud.secretmanager = secretmanager  # ty: ignore[unresolved-attribute]
+    cloud.secretmanager = secretmanager  # ty: ignore[missing-attribute]
     google = ModuleType("google")
-    google.cloud = cloud  # ty: ignore[unresolved-attribute]
+    google.cloud = cloud  # ty: ignore[missing-attribute]
     monkeypatch.setitem(sys.modules, "google", google)
     monkeypatch.setitem(sys.modules, "google.cloud", cloud)
     monkeypatch.setitem(sys.modules, "google.cloud.secretmanager", secretmanager)

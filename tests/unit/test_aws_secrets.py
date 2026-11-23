@@ -40,7 +40,7 @@ def secretsmanager(monkeypatch, fake_pem):
         return client
 
     boto3 = ModuleType("boto3")
-    boto3.client = make_client  # ty: ignore[unresolved-attribute]
+    boto3.client = make_client  # ty: ignore[missing-attribute]
     monkeypatch.setitem(sys.modules, "boto3", boto3)
     return client
 
@@ -90,7 +90,7 @@ def test_client_creation_failure_raises_runtime_error(monkeypatch):
         raise NoRegionError("You must specify a region.")
 
     boto3 = ModuleType("boto3")
-    boto3.client = make_client  # ty: ignore[unresolved-attribute]
+    boto3.client = make_client  # ty: ignore[missing-attribute]
     monkeypatch.setitem(sys.modules, "boto3", boto3)
 
     with pytest.raises(RuntimeError, match="client") as excinfo:
